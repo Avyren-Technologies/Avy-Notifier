@@ -1,0 +1,272 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma-client"
+  binaryTargets = ["native", "windows"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  OPERATOR
+}
+
+model Organization {
+  id           String   @id @default(uuid())
+  name         String
+  scadaDbConfig Json    // Encrypted: { host, port, user, pass, db, table, columns }
+  schemaConfig  Json    // Alarm logic, column mapping, etc.
+  isEnabled    Boolean  @default(true) // Whether the organization is enabled
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  users        User[]
+  notifications Notification[]
+  alarms       Alarm[]
+  alarmHistories AlarmHistory[]
+  meterReports MeterReport[]
+  furnaceReports FurnaceReport[]
+  systemSettings SystemSettings[]
+  setpoints    Setpoint[]
+  meterLimits  MeterLimit[]
+  notificationSettings NotificationSettings[]
+}
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  password        String
+  name            String
+  role            UserRole  @default(OPERATOR)
+  avatar          String?   @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  acknowledgedAlarms Alarm[] @relation("AcknowledgedBy")
+  resolvedAlarms  Alarm[]   @relation("ResolvedBy")
+  acknowledgedHistoryAlarms AlarmHistory[] @relation("AcknowledgedBy")
+  resolvedHistoryAlarms AlarmHistory[] @relation("ResolvedBy")
+  notifications   Notification[]
+  reports         MeterReport[]
+  furnaceReports  FurnaceReport[]
+  pushToken       String?
+  notificationSettings NotificationSettings[]
+  organizationId  String?
+  organization    Organization? @relation(fields: [organizationId], references: [id])
+}
+
+enum AlarmType {
+  TEMPERATURE
+  LEVEL
+  PRESSURE
+  MOTOR
+  CONVEYOR
+  FAN
+  HEATER
+  CARBON
+  OIL
+}
+
+enum Zone {
+  ZONE1
+  ZONE2
+}
+
+enum AlarmSeverity {
+  CRITICAL
+  WARNING
+  INFO
+}
+
+enum AlarmStatus {
+  ACTIVE
+  ACKNOWLEDGED
+  RESOLVED
+}
+
+enum NotificationType {
+  ALARM
+  SYSTEM
+  MAINTENANCE
+  INFO
+}
+
+enum NotificationPriority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model Notification {
+  id              String              @id @default(uuid())
+  userId          String
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title           String
+  body            String
+  type            NotificationType
+  priority        NotificationPriority @default(MEDIUM)
+  isRead          Boolean             @default(false)
+  metadata        Json?
+  createdAt       DateTime            @default(now())
+  readAt          DateTime?
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+}
+
+model NotificationSettings {
+  id              String    @id @default(uuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  pushEnabled     Boolean   @default(true)
+  emailEnabled    Boolean   @default(false)
+  criticalOnly    Boolean   @default(false)
+  muteFrom        Int?      // Hour to start muting (0-23)
+  muteTo          Int?      // Hour to end muting (0-23)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([userId, organizationId])
+}
+
+model Alarm {
+  id              String        @id @default(uuid())
+  description     String
+  type            AlarmType
+  zone            Zone?
+  severity        AlarmSeverity
+  status          AlarmStatus   @default(ACTIVE)
+  value           String
+  setPoint        String
+  unit            String?
+  lowLimit        Float?
+  highLimit       Float?
+  notes           String?
+  timestamp       DateTime      @default(now())
+  acknowledgedById String?
+  acknowledgedBy  User?         @relation("AcknowledgedBy", fields: [acknowledgedById], references: [id], onDelete: SetNull)
+  acknowledgedAt  DateTime?
+  resolvedById    String?
+  resolvedBy      User?         @relation("ResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
+  resolvedAt      DateTime?
+  resolutionMessage String?     @db.Text
+  history         AlarmHistory[]
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+}
+
+model AlarmHistory {
+  id              String        @id @default(uuid())
+  alarmId         String
+  alarm           Alarm         @relation(fields: [alarmId], references: [id])
+  description     String
+  type            AlarmType
+  severity        AlarmSeverity
+  status          AlarmStatus
+  value           String
+  setPoint        String
+  timestamp       DateTime      @default(now())
+  acknowledgedById String?
+  acknowledgedBy  User?         @relation("AcknowledgedBy", fields: [acknowledgedById], references: [id], onDelete: SetNull)
+  acknowledgedAt  DateTime?
+  resolvedById    String?
+  resolvedBy      User?         @relation("ResolvedBy", fields: [resolvedById], references: [id], onDelete: SetNull)
+  resolvedAt      DateTime?
+  resolutionMessage String?     @db.Text
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+}
+
+model Setpoint {
+  id            String   @id @default(cuid())
+  name          String
+  type          String
+  zone          String?
+  scadaField    String   // Field name in SCADA database (e.g., "hz1sv")
+  lowDeviation  Float
+  highDeviation Float
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([name, organizationId])
+}
+
+model SystemSettings {
+  id              String    @id @default(uuid())
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  organizationId  String    @unique
+  maintenanceMode Boolean   @default(false)
+  enabledBy       String?
+  enabledAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Model to store limits for meter readings
+model MeterLimit {
+  id              String    @id @default(cuid())
+  parameter       String    // voltage, current, frequency, pf, energy, power
+  description     String
+  unit            String
+  highLimit       Float     // Upper threshold that triggers notifications
+  lowLimit        Float?    // Optional lower threshold
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdById     String?
+  updatedById     String?
+
+  @@unique([parameter, organizationId])
+}
+
+// Model to store generated meter reports
+model MeterReport {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title           String
+  format          String    // "excel", "pdf", etc
+  fileContent     Bytes     // Store the file content in bytea format
+  fileName        String
+  fileSize        Int
+  startDate       DateTime
+  endDate         DateTime
+  parameters      String[]  // Array of parameters included in report
+  createdAt       DateTime  @default(now())
+  metadata        Json?
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+}
+
+// Model to store generated furnace reports
+model FurnaceReport {
+  id                  String    @id @default(cuid())
+  userId              String
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title               String
+  format              String    // "excel", "pdf", etc
+  fileContent         Bytes     // Store the file content in bytea format
+  fileName            String
+  fileSize            Int
+  startDate           DateTime
+  endDate             DateTime
+  grouping            String    // "newest_first", "oldest_first"
+  includeThresholds   Boolean   @default(true)
+  includeStatusFields Boolean   @default(true)
+  alarmTypes          String[]  // Array of alarm types included
+  severityLevels      String[]  // Array of severity levels included
+  zones               String[]  // Array of zones included
+  createdAt           DateTime  @default(now())
+  metadata            Json?
+  organizationId      String
+  organization        Organization @relation(fields: [organizationId], references: [id])
+} 
