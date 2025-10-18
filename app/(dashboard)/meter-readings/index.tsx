@@ -35,6 +35,8 @@ import {
   formatTimestampIST, 
   formatChartLabelIST 
 } from '../../utils/timezoneUtils';
+import { LinearGradient } from 'expo-linear-gradient';
+import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../constants/theme';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -803,6 +805,38 @@ export default function MeterReadingsScreen() {
       style={[styles.container, { backgroundColor: isDarkMode ? '#0F172A' : '#F8FAFC' }]}>
       <StatusBar style={isDarkMode ? 'light' : 'dark'} />
 
+      {/* Modern Background Gradient */}
+      <LinearGradient
+        colors={
+          isDarkMode
+            ? ['#0F172A', '#1E293B', '#312E81', '#1E293B']
+            : ['#F8FAFC', '#EFF6FF', '#E0E7FF', '#F8FAFC']
+        }
+        style={StyleSheet.absoluteFillObject}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      />
+
+      {/* Floating Background Elements */}
+      <View style={styles.floatingElements}>
+        <View style={styles.orb1}>
+          <LinearGradient
+            colors={['#10B981', '#059669']}
+            style={styles.orbGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+        </View>
+        <View style={styles.orb2}>
+          <LinearGradient
+            colors={['#06B6D4', '#0891B2']}
+            style={styles.orbGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+        </View>
+      </View>
+
       {/* Header */}
       <View
         style={[
@@ -838,15 +872,16 @@ export default function MeterReadingsScreen() {
               ]}>
               Meter Notifier
             </Text>
-            <Text
-              style={[
-                styles.headerSubtitle,
-                {
-                  color: isDarkMode ? '#94A3B8' : '#64748B',
-                },
-              ]}>
-              {isAdmin ? 'Admin Dashboard' : 'Operator Dashboard'}
-            </Text>
+            <LinearGradient
+              colors={['#10B981', '#059669', '#047857']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.subtitleGradient}
+            >
+              <Text style={styles.headerSubtitleGradient}>
+                {isAdmin ? 'Admin Dashboard' : 'Operator Dashboard'}
+              </Text>
+            </LinearGradient>
           </View>
         </View>
 
@@ -1577,6 +1612,48 @@ export default function MeterReadingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  floatingElements: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  orb1: {
+    position: 'absolute',
+    top: -100,
+    right: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    opacity: 0.15,
+  },
+  orb2: {
+    position: 'absolute',
+    bottom: -150,
+    left: -100,
+    width: 350,
+    height: 350,
+    borderRadius: 175,
+    opacity: 0.12,
+  },
+  orbGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 9999,
+  },
+  subtitleGradient: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    marginTop: 2,
+  },
+  headerSubtitleGradient: {
+    fontSize: windowWidth > highDPIPhones ? 13 : 11,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',

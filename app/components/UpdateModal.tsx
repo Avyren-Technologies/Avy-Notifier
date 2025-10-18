@@ -44,12 +44,35 @@ export function UpdateModal({ visible, isDownloading, onUpdate, onCancel }: Upda
           ]}>
             Update Available
           </Text>
-          <Text style={[
-            styles.description,
-            { color: isDarkMode ? '#9CA3AF' : '#6B7280' }
-          ]}>
-            A new version of Eagle Notifier is available. Update now to get the latest features and improvements.
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+            <Text
+              style={[
+                styles.description,
+                { color: isDarkMode ? '#9CA3AF' : '#6B7280' }
+              ]}>
+              A new version of&nbsp;
+            </Text>
+            <Text
+              style={[
+                styles.description,
+                { color: isDarkMode ? '#F8FAFC' : '#1E293B', fontWeight: 'bold' }
+              ]}>
+              Avy
+            </Text>
+            <Ionicons
+              name="information-circle-outline"
+              size={16}
+              color={isDarkMode ? '#F8FAFC' : '#6366F1'}
+              style={{ marginLeft: 2, marginTop: 2 }}
+            />
+            <Text
+              style={[
+                styles.description,
+                { color: isDarkMode ? '#9CA3AF' : '#6B7280' }
+              ]}>
+              &nbsp;is available. Update now to get the latest features and improvements.
+            </Text>
+          </View>
 
           {/* Buttons */}
           <View style={styles.buttonContainer}>

@@ -1179,7 +1179,7 @@ This project is proprietary software developed by TecoSoft Digital Solutions.
 
 ## Support
 
-For support or questions, please contact support@tecosoft.ai
+For support or questions, please contact support@Avyren Technologies
 
 ---
 

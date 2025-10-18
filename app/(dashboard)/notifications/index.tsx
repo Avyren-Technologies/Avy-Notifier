@@ -21,6 +21,8 @@ import {
   useDeleteNotification
 } from '../../hooks/useNotifications';
 import { Notification } from '../../types/notification';
+import { LinearGradient } from 'expo-linear-gradient';
+import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../constants/theme';
 
 export default function NotificationsScreen() {
   const { isDarkMode } = useTheme();
@@ -395,6 +397,38 @@ export default function NotificationsScreen() {
       { backgroundColor: isDarkMode ? '#111827' : '#F9FAFB' }
     ]}>
       <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+
+      {/* Modern Background Gradient */}
+      <LinearGradient
+        colors={
+          isDarkMode
+            ? ['#0F172A', '#1E293B', '#312E81', '#1E293B']
+            : ['#F8FAFC', '#EFF6FF', '#E0E7FF', '#F8FAFC']
+        }
+        style={StyleSheet.absoluteFillObject}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      />
+
+      {/* Floating Background Elements */}
+      <View style={styles.floatingElements}>
+        <View style={styles.orb1}>
+          <LinearGradient
+            colors={['#6366F1', '#8B5CF6']}
+            style={styles.orbGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+        </View>
+        <View style={styles.orb2}>
+          <LinearGradient
+            colors={['#D946EF', '#F0ABFC']}
+            style={styles.orbGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+        </View>
+      </View>
       
       {/* Header */}
       <View style={styles.header}>
@@ -419,12 +453,16 @@ export default function NotificationsScreen() {
           ]}>
             {pageTitle}
           </Text>
-          <Text style={[
-            styles.headerSubtitle,
-            { color: isDarkMode ? '#9CA3AF' : '#6B7280' }
-          ]}>
-            {pageSubtitle}
-          </Text>
+          <LinearGradient
+            colors={['#6366F1', '#8B5CF6', '#D946EF']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.subtitleGradient}
+          >
+            <Text style={styles.headerSubtitleGradient}>
+              {pageSubtitle}
+            </Text>
+          </LinearGradient>
         </View>
       </View>
       
@@ -478,6 +516,48 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  floatingElements: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  orb1: {
+    position: 'absolute',
+    top: -100,
+    right: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    opacity: 0.15,
+  },
+  orb2: {
+    position: 'absolute',
+    bottom: -150,
+    left: -100,
+    width: 350,
+    height: 350,
+    borderRadius: 175,
+    opacity: 0.12,
+  },
+  orbGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 9999,
+  },
+  subtitleGradient: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    marginTop: 2,
+  },
+  headerSubtitleGradient: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',

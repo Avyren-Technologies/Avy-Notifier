@@ -34,7 +34,8 @@ import { SetpointConfigModal } from '../../components/SetpointConfigModal';
 import { useMaintenance } from '../../context/MaintenanceContext';
 import { useUnreadCount } from '../../hooks/useNotifications';
 import { LinearGradient } from 'expo-linear-gradient';
-import { getTheme, Colors, Shadows, BorderRadius } from '../../constants/theme';
+import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../constants/theme';
+import * as SecureStore from 'expo-secure-store';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const DEVICE_WIDTH = Dimensions.get('window').width;
@@ -601,9 +602,20 @@ export default function OperatorDashboard() {
               borderWidth: severityFilter === 'critical' ? 2 : 1,
             },
           ]}>
-          <View style={[styles.summaryIcon, { backgroundColor: THEME.dark.status.critical }]}>
-            <Ionicons name="alert-circle" size={16} color={THEME.dark.text.primary} />
-          </View>
+          {severityFilter === 'critical' ? (
+            <LinearGradient
+              colors={['#EF4444', '#DC2626', '#B91C1C']}
+              style={styles.summaryIconGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Ionicons name="alert-circle" size={16} color="#FFFFFF" />
+            </LinearGradient>
+          ) : (
+            <View style={[styles.summaryIcon, { backgroundColor: THEME.dark.status.critical }]}>
+              <Ionicons name="alert-circle" size={16} color={THEME.dark.text.primary} />
+            </View>
+          )}
           <Text
             style={[
               styles.summaryCount,
@@ -635,9 +647,20 @@ export default function OperatorDashboard() {
               borderWidth: severityFilter === 'warning' ? 2 : 1,
             },
           ]}>
-          <View style={[styles.summaryIcon, { backgroundColor: THEME.dark.status.warning }]}>
-            <Ionicons name="warning" size={16} color={THEME.dark.text.primary} />
-          </View>
+          {severityFilter === 'warning' ? (
+            <LinearGradient
+              colors={['#F97316', '#EA580C', '#C2410C']}
+              style={styles.summaryIconGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Ionicons name="warning" size={16} color="#FFFFFF" />
+            </LinearGradient>
+          ) : (
+            <View style={[styles.summaryIcon, { backgroundColor: THEME.dark.status.warning }]}>
+              <Ionicons name="warning" size={16} color={THEME.dark.text.primary} />
+            </View>
+          )}
           <Text
             style={[
               styles.summaryCount,
@@ -669,9 +692,20 @@ export default function OperatorDashboard() {
               borderWidth: severityFilter === 'info' ? 2 : 1,
             },
           ]}>
-          <View style={[styles.summaryIcon, { backgroundColor: THEME.dark.status.success }]}>
-            <Ionicons name="information-circle" size={16} color={THEME.dark.text.primary} />
-          </View>
+          {severityFilter === 'info' ? (
+            <LinearGradient
+              colors={['#22C55E', '#16A34A', '#15803D']}
+              style={styles.summaryIconGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Ionicons name="information-circle" size={16} color="#FFFFFF" />
+            </LinearGradient>
+          ) : (
+            <View style={[styles.summaryIcon, { backgroundColor: THEME.dark.status.success }]}>
+              <Ionicons name="information-circle" size={16} color={THEME.dark.text.primary} />
+            </View>
+          )}
           <Text
             style={[
               styles.summaryCount,
@@ -1063,6 +1097,48 @@ export default function OperatorDashboard() {
     container: {
     flex: 1,
     },
+    floatingElements: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+    },
+    orb1: {
+      position: 'absolute',
+      top: -100,
+      right: -100,
+      width: 300,
+      height: 300,
+      borderRadius: 150,
+      opacity: 0.15,
+    },
+    orb2: {
+      position: 'absolute',
+      bottom: -150,
+      left: -100,
+      width: 350,
+      height: 350,
+      borderRadius: 175,
+      opacity: 0.12,
+    },
+    orbGradient: {
+      width: '100%',
+      height: '100%',
+      borderRadius: 9999,
+    },
+    subtitleGradient: {
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 12,
+      alignSelf: 'flex-start',
+      marginTop: 2,
+    },
+    headerSubtitleGradient: {
+      fontSize: windowWidth > highDPIPhones ? 12 : 12,
+      fontWeight: '600',
+      color: '#FFFFFF',
+    },
     header: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -1214,6 +1290,14 @@ export default function OperatorDashboard() {
       }),
     },
     summaryIcon: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 6,
+    },
+    summaryIconGradient: {
       width: 28,
       height: 28,
       borderRadius: 14,
@@ -1573,6 +1657,38 @@ export default function OperatorDashboard() {
       style={[styles.container, { backgroundColor: isDarkMode ? '#0F172A' : '#F8FAFC' }]}>
       <StatusBar style={isDarkMode ? 'light' : 'dark'} />
 
+      {/* Modern Background Gradient */}
+      <LinearGradient
+        colors={
+          isDarkMode
+            ? ['#0F172A', '#1E293B', '#312E81', '#1E293B']
+            : ['#F8FAFC', '#EFF6FF', '#E0E7FF', '#F8FAFC']
+        }
+        style={StyleSheet.absoluteFillObject}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      />
+
+      {/* Floating Background Elements */}
+      <View style={styles.floatingElements}>
+        <View style={styles.orb1}>
+          <LinearGradient
+            colors={['#6366F1', '#8B5CF6']}
+            style={styles.orbGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+        </View>
+        <View style={styles.orb2}>
+          <LinearGradient
+            colors={['#D946EF', '#F0ABFC']}
+            style={styles.orbGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+        </View>
+      </View>
+
       {/* Enhanced Header */}
       <View
         style={[
@@ -1599,24 +1715,33 @@ export default function OperatorDashboard() {
             />
           </View>
           <View style={styles.titleContainer}>
-            <Text
-              style={[
-                styles.headerTitle,
-                {
-                  color: isDarkMode ? '#F8FAFC' : '#1E293B',
-                },
-              ]}>
-              Eagle Notifier
-            </Text>
-            <Text
-              style={[
-                styles.headerSubtitle,
-                {
-                  color: isDarkMode ? '#94A3B8' : '#64748B',
-                },
-              ]}>
-              {isAdmin ? 'Admin Dashboard' : 'Operator Dashboard'}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text
+                style={[
+                  styles.headerTitle,
+                  {
+                    color: isDarkMode ? '#F8FAFC' : '#1E293B',
+                  },
+                ]}>
+                Avy&nbsp;
+              </Text>
+              <Ionicons
+                name="information-circle-outline"
+                size={windowWidth > highDPIPhones ? 28 : 24}
+                color={isDarkMode ? '#F8FAFC' : '#6366F1'}
+                style={{ marginLeft: -2, marginTop: 2 }}
+              />
+            </View>
+            <LinearGradient
+              colors={['#6366F1', '#8B5CF6', '#D946EF']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.subtitleGradient}
+            >
+              <Text style={styles.headerSubtitleGradient}>
+                {isAdmin ? 'Admin Dashboard' : 'Operator Dashboard'}
+              </Text>
+            </LinearGradient>
             {!isSuperAdmin && isScadaMaintenanceMode && (
               <View style={[
                 styles.maintenanceBadge,
@@ -1784,6 +1909,7 @@ export default function OperatorDashboard() {
               tintColor={isDarkMode ? '#60A5FA' : '#3B82F6'}
             />
           }>
+
           {/* Status Summary */}
           {renderSummaryCards()}
 

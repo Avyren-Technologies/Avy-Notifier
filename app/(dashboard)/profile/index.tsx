@@ -1284,7 +1284,7 @@ export default function ProfileScreen() {
         </TouchableOpacity>
 
         <View style={styles.footer}>
-          <Text style={styles.footerText}>© 2025 Tecosoft.ai. All rights reserved.</Text>
+          <Text style={styles.footerText}>© 2025 Avyren Technologies. All rights reserved.</Text>
           <Text style={[styles.footerText, { marginTop: 5, paddingBottom: 10 }]}>
             Version {APP_VERSION}
           </Text>

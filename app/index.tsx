@@ -213,15 +213,27 @@ export default function OnboardingScreen() {
             <Image source={require("../assets/images/Eagle-Logo.png")} style={{ width: 110, height: 110 }} />
           </LinearGradient>
 
-          <Animated.Text
+          <Animated.View
             style={[
-              styles.appName,
-              { color: isDarkMode ? "#FFFFFF" : "#0F172A" },
+              { flexDirection: 'row', alignItems: 'center' },
               { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
             ]}
           >
-            Eagle Notifier
-          </Animated.Text>
+            <Text
+              style={[
+                styles.appName,
+                { color: isDarkMode ? '#F8FAFC' : '#0F172A' },
+              ]}
+            >
+              Avy&nbsp;
+            </Text>
+            <Ionicons
+              name="information-circle-outline"
+              size={38}
+              color={isDarkMode ? '#F8FAFC' : '#6366F1'}
+              style={{ marginLeft: -2, marginTop: 2 }}
+            />
+          </Animated.View>
 
           <Animated.Text
             style={[
@@ -302,7 +314,7 @@ export default function OnboardingScreen() {
           </Text>
         </TouchableOpacity>
 
-        <Text style={[styles.poweredBy, { color: isDarkMode ? "#64748B" : "#94A3B8" }]}>Powered by Tecosoft.ai</Text>
+        <Text style={[styles.poweredBy, { color: isDarkMode ? "#64748B" : "#94A3B8" }]}>Powered by Avyren Technologies</Text>
       </View>
 
       <UpdateModal

@@ -14,6 +14,8 @@ import * as IntentLauncher from 'expo-intent-launcher';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import ErrorBoundary from '../../components/ErrorBoundary';
+import { LinearGradient } from 'expo-linear-gradient';
+// import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../constants/theme';
 
 export default function ReportsScreen() {
   const { isDarkMode } = useTheme();
@@ -296,6 +298,38 @@ export default function ReportsScreen() {
       >
       <StatusBar style={isDarkMode ? 'light' : 'dark'} />
 
+      {/* Modern Background Gradient */}
+      <LinearGradient
+        colors={
+          isDarkMode
+            ? ['#0F172A', '#1E293B', '#312E81', '#1E293B']
+            : ['#F8FAFC', '#EFF6FF', '#E0E7FF', '#F8FAFC']
+        }
+        style={StyleSheet.absoluteFillObject}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      />
+
+      {/* Floating Background Elements */}
+      <View style={styles.floatingElements}>
+        <View style={styles.orb1}>
+          <LinearGradient
+            colors={['#EF4444', '#DC2626']}
+            style={styles.orbGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+        </View>
+        <View style={styles.orb2}>
+          <LinearGradient
+            colors={['#F59E0B', '#D97706']}
+            style={styles.orbGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+        </View>
+      </View>
+
       <View style={[
         styles.header,
         {
@@ -316,9 +350,16 @@ export default function ReportsScreen() {
         </TouchableOpacity>
         <View style={styles.headerTextContainer}>
           <Text style={[styles.headerTitle, { color: theme.text }]}>Reports</Text>
-          <Text style={[styles.headerSubtitle, { color: theme.subtext }]}>
-            Generate and share alarm reports
-          </Text>
+          <LinearGradient
+            colors={['#EF4444', '#DC2626', '#B91C1C']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.subtitleGradient}
+          >
+            <Text style={styles.headerSubtitleGradient}>
+              Generate and share alarm reports
+            </Text>
+          </LinearGradient>
         </View>
 
         <TouchableOpacity
@@ -549,6 +590,48 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  floatingElements: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  orb1: {
+    position: 'absolute',
+    top: -100,
+    right: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    opacity: 0.15,
+  },
+  orb2: {
+    position: 'absolute',
+    bottom: -150,
+    left: -100,
+    width: 350,
+    height: 350,
+    borderRadius: 175,
+    opacity: 0.12,
+  },
+  orbGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 9999,
+  },
+  subtitleGradient: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+    marginTop: 2,
+  },
+  headerSubtitleGradient: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
   flexContainer: {
     flex: 1,
   },
@@ -571,14 +654,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
   },
   headerSubtitle: {
-    fontSize: 14,
+    fontSize: 8,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
   },
   newReportButton: {

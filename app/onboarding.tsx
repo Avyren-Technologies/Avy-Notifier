@@ -125,7 +125,22 @@ export default function Onboarding() {
             <Image source={require("../assets/images/Eagle-Logo.png")} style={styles.logo} resizeMode="contain" />
           </LinearGradient>
 
-          <Text style={[styles.headerTitle, { color: isDarkMode ? "#FFFFFF" : "#0F172A" }]}>Eagle Notifier</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text
+              style={[
+                styles.headerTitle,
+                { color: isDarkMode ? "#FFFFFF" : "#0F172A" },
+              ]}
+            >
+              Avy&nbsp;
+            </Text>
+            <Ionicons
+              name="information-circle-outline"
+              size={32}
+              color={isDarkMode ? "#FFFFFF" : "#6366F1"}
+              style={{ marginLeft: -4, marginTop: -4 }}
+            />
+          </View>
 
           <LinearGradient
             colors={["#6366F1", "#8B5CF6", "#D946EF"]}
