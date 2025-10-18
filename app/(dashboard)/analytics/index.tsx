@@ -22,6 +22,8 @@ import { useRouter } from 'expo-router';
 import { useAnalyticsData } from '../../hooks/useAlarms';
 import { formatTimestampIST } from '../../utils/timezoneUtils';
 import { useQueryClient } from '@tanstack/react-query';
+import { LinearGradient } from 'expo-linear-gradient';
+import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../constants/theme';
 
 // Types
 type GraphType = 'analog' | 'binary';
@@ -1146,12 +1148,6 @@ export default function AnalyticsScreen() {
       outputRange: [1, 0.5, 1]
     });
     
-    // Background color animation
-    const backgroundColor = animatedValue.interpolate({
-      inputRange: [0, 1],
-      outputRange: [theme.primary, '#6366f1'] // Blue to indigo transition
-    });
-    
     return (
       <Animated.View 
         style={[
@@ -1161,61 +1157,42 @@ export default function AnalyticsScreen() {
           }
         ]}
       >
-        <Animated.View
-          style={[
-            styles.toggleButtonBackground,
-            {
-              backgroundColor: backgroundColor
-            }
-          ]}
-        />
         <TouchableOpacity
           style={styles.toggleButton}
           onPress={toggleGraph}
           activeOpacity={0.8}
         >
-          <View style={{ 
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center' 
-          }}>
-            <Animated.View style={[
-              styles.iconContainer,
-              {
-                transform: [{ rotate }, { scale: iconScale }],
-                opacity: iconOpacity
-              }
-            ]}>
-              <Ionicons
-                name={activeGraph === 'analog' ? 'analytics' : 'toggle'}
-                size={22}
-                color="#FFFFFF"
-                style={styles.toggleIcon}
-              />
-            </Animated.View>
-            <Text style={{ color: '#FFFFFF', fontSize: 15, fontWeight: '600' }}>
-              {activeGraph === 'analog' ? 'Switch to Binary View' : 'Switch to Analog View'}
-            </Text>
-          </View>
-          
-          {/* Button shine effect */}
-          <Animated.View 
-            style={[
-              styles.toggleShine,
-              {
-                opacity: animatedValue.interpolate({
-                  inputRange: [0, 0.5, 1],
-                  outputRange: [0, 0.8, 0]
-                }),
-                transform: [{
-                  translateX: animatedValue.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [-100, 100]
-                  })
-                }]
-              }
-            ]}
-          />
+          <LinearGradient
+            colors={['#6366F1', '#8B5CF6', '#D946EF']}
+            style={styles.toggleButtonGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
+            <View style={{ 
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%'
+            }}>
+              <Animated.View style={[
+                styles.iconContainer,
+                {
+                  transform: [{ rotate }, { scale: iconScale }],
+                  opacity: iconOpacity
+                }
+              ]}>
+                <Ionicons
+                  name={activeGraph === 'analog' ? 'analytics' : 'toggle'}
+                  size={22}
+                  color="#FFFFFF"
+                  style={styles.toggleIcon}
+                />
+              </Animated.View>
+              <Text style={{ color: '#FFFFFF', fontSize: 15, fontWeight: '600', marginLeft: 8 }}>
+                {activeGraph === 'analog' ? 'Switch to Binary View' : 'Switch to Analog View'}
+              </Text>
+            </View>
+          </LinearGradient>
         </TouchableOpacity>
       </Animated.View>
     );
@@ -1244,34 +1221,46 @@ export default function AnalyticsScreen() {
             style={[
               styles.timeRangeButton,
               timeRange === range.value && styles.timeRangeButtonActive,
-              {
-                backgroundColor: timeRange === range.value ? theme.primary : theme.surface,
-                borderColor: theme.border,
-                opacity: isLoading && timeRange === range.value ? 0.7 : 1, // Visual feedback when loading
-              }
             ]}
             onPress={() => setTimeRange(range.value)}
-            disabled={isLoading} // Prevent rapid clicking while loading
+            disabled={isLoading}
           >
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text
-                style={[
-                  styles.timeRangeText,
-                  {
-                    color: timeRange === range.value ? '#FFFFFF' : theme.text,
-                  }
-                ]}
+            {timeRange === range.value ? (
+              <LinearGradient
+                colors={['#6366F1', '#8B5CF6', '#D946EF']}
+                style={styles.timeRangeButtonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
               >
-                {range.label}
-              </Text>
-              {isLoading && timeRange === range.value && (
-                <ActivityIndicator 
-                  size="small" 
-                  color="#FFFFFF" 
-                  style={{ marginLeft: 4 }} 
-                />
-              )}
-            </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={styles.timeRangeButtonTextActive}>
+                    {range.label}
+                  </Text>
+                  {isLoading && (
+                    <ActivityIndicator 
+                      size="small" 
+                      color="#FFFFFF" 
+                      style={{ marginLeft: 4 }} 
+                    />
+                  )}
+                </View>
+              </LinearGradient>
+            ) : (
+              <View style={[
+                styles.timeRangeButtonInactive,
+                {
+                  backgroundColor: isDarkMode ? 'rgba(51, 65, 85, 0.6)' : 'rgba(255, 255, 255, 0.8)',
+                  borderColor: isDarkMode ? '#475569' : '#E2E8F0',
+                }
+              ]}>
+                <Text style={[
+                  styles.timeRangeButtonText,
+                  { color: isDarkMode ? '#CBD5E1' : '#475569' }
+                ]}>
+                  {range.label}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -1313,33 +1302,72 @@ export default function AnalyticsScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? '#0F172A' : '#F8FAFC' }]}>
       <StatusBar style={isDarkMode ? 'light' : 'dark'} />
 
-      {/* Header */}
+      {/* Modern Background Gradient */}
+      <LinearGradient
+        colors={
+          isDarkMode 
+            ? ['#0F172A', '#1E293B', '#312E81', '#1E293B']
+            : ['#F8FAFC', '#EFF6FF', '#E0E7FF', '#F8FAFC']
+        }
+        style={StyleSheet.absoluteFillObject}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      />
+
+      {/* Floating Background Elements */}
+      <View style={styles.floatingElements}>
+        <View style={styles.orb1}>
+          <LinearGradient
+            colors={['#6366F1', '#8B5CF6']}
+            style={styles.orbGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+        </View>
+        <View style={styles.orb2}>
+          <LinearGradient
+            colors={['#D946EF', '#F0ABFC']}
+            style={styles.orbGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+        </View>
+      </View>
+
+      {/* Modern Header */}
       <View style={[
         styles.header,
         { 
-          backgroundColor: theme.surface,
-          borderBottomColor: theme.border,
+          backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(248, 250, 252, 0.95)',
+          borderBottomColor: isDarkMode ? 'rgba(51, 65, 85, 0.3)' : 'rgba(226, 232, 240, 0.8)',
           borderBottomWidth: 1,
         }
       ]}>
         <TouchableOpacity
           style={[
             styles.backButton,
-            { backgroundColor: isDarkMode ? 'rgba(55, 65, 81, 0.5)' : 'rgba(243, 244, 246, 0.7)' }
+            { backgroundColor: isDarkMode ? 'rgba(51, 65, 85, 0.6)' : 'rgba(255, 255, 255, 0.8)' }
           ]}
           onPress={() => router.back()}
         >
-          <Ionicons name="arrow-back" size={22} color={theme.text} />
+          <Ionicons name="arrow-back" size={22} color={isDarkMode ? '#F8FAFC' : '#0F172A'} />
         </TouchableOpacity>
 
         <View style={styles.headerTextContainer}>
-          <Text style={[styles.headerTitle, { color: theme.text }]}>Analytics</Text>
-          <Text style={[styles.headerSubtitle, { color: theme.subtext }]}>
-            Real-time Alarm Trends & Patterns
-          </Text>
+          <Text style={[styles.headerTitle, { color: isDarkMode ? '#F8FAFC' : '#0F172A' }]}>Analytics</Text>
+          <LinearGradient
+            colors={['#6366F1', '#8B5CF6', '#D946EF']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.subtitleGradient}
+          >
+            <Text style={styles.headerSubtitle}>
+              Real-time Alarm Trends & Patterns
+            </Text>
+          </LinearGradient>
         </View>
       </View>
 
@@ -1392,29 +1420,90 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  floatingElements: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  orb1: {
+    position: 'absolute',
+    top: -100,
+    right: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    opacity: 0.15,
+  },
+  orb2: {
+    position: 'absolute',
+    bottom: -150,
+    left: -100,
+    width: 350,
+    height: 350,
+    borderRadius: 175,
+    opacity: 0.12,
+  },
+  orbGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 9999,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 8,
+    marginRight: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   headerTextContainer: {
     flex: 1,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  subtitleGradient: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 16,
+    alignSelf: 'flex-start',
   },
   headerSubtitle: {
     fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   content: {
     flex: 1,
@@ -1438,18 +1527,69 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   timeRangeButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
     marginHorizontal: 4,
-    borderWidth: 1,
+    borderRadius: 20,
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   timeRangeButtonActive: {
     borderColor: 'transparent',
   },
-  timeRangeText: {
+  timeRangeButtonGradient: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  timeRangeButtonInactive: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  timeRangeButtonText: {
     fontSize: 14,
     fontWeight: '500',
+  },
+  timeRangeButtonTextActive: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  toggleButtonContainer: {
+    marginBottom: 20,
+    marginHorizontal: 16,
+  },
+  toggleButton: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    width: '100%',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#6366F1',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.3,
+        shadowRadius: 16,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
+  },
+  toggleButtonGradient: {
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 20,
+    width: '100%',
   },
 
   graphContainer: {
@@ -1535,38 +1675,6 @@ const styles = StyleSheet.create({
   },
   toggleIcon: {
     marginRight: 0,
-  },
-  toggleButtonContainer: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: 16,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-  },
-  toggleButtonBackground: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 12,
-  },
-  toggleButton: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    borderWidth: 0,
-    position: 'relative',
-    overflow: 'hidden',
   },
   iconContainer: {
     width: 30,

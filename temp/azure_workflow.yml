@@ -1,4 +1,4 @@
-name: CI/CD for Eagle-Notifier
+name: CI/CD for Avy I
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
       - name: Build and Push Docker Image
         run: |
           cd backend
-          IMAGE_NAME=chiranjeevichetan/eagle-notifier-app
+          IMAGE_NAME=chiranjeevichetan/avyi-app
           IMAGE_TAG=v${{ github.run_number }}
           docker build -t $IMAGE_NAME:$IMAGE_TAG .
           docker push $IMAGE_NAME:$IMAGE_TAG
@@ -36,7 +36,7 @@ jobs:
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v2
         with:
-          app-name: "Eagle-Notifier-Server"
+          app-name: "avyi-server"
           slot-name: "production"
-          images: "chiranjeevichetan/eagle-notifier-app:v${{ github.run_number }}"
+          images: "chiranjeevichetan/avyi-app:v${{ github.run_number }}"
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}

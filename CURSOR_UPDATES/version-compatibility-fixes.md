@@ -1,7 +1,7 @@
-# Version Compatibility Fixes - Eagle Notifier
+# Version Compatibility Fixes - Avy I
 
 ## Overview
-This document outlines all the changes made to resolve version compatibility issues, build errors, and dependency conflicts in the Eagle Notifier project.
+This document outlines all the changes made to resolve version compatibility issues, build errors, and dependency conflicts in the Avy I project.
 
 ## Issues Identified and Resolved
 

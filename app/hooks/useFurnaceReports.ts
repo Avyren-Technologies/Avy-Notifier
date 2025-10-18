@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
+import { EncodingType } from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { Alert, Platform } from 'react-native';
@@ -75,7 +76,7 @@ export function useFurnaceReports() {
   } = useQuery<PaginatedReportsResponse>({
     queryKey: ['furnaceReports', currentPage],
     queryFn: async () => {
-      const headers = await getOrgHeaders(organizationId);
+      const headers = await getOrgHeaders(organizationId || undefined);
       
       // Fetch reports for the current page
       const { data } = await axios.get(
@@ -106,7 +107,7 @@ export function useFurnaceReports() {
       setIsLoadingMore(true);
       const nextPage = currentPage + 1;
       
-      const headers = await getOrgHeaders(organizationId);
+      const headers = await getOrgHeaders(organizationId || undefined);
       const { data } = await axios.get(
         `${apiConfig.apiUrl}/api/reports/furnace?page=${nextPage}&limit=10`,
         { headers }
@@ -196,7 +197,7 @@ export function useFurnaceReports() {
         
         if (format === 'excel') {
           // Fetch the data directly from API
-          const headers = await getOrgHeaders(organizationId);
+          const headers = await getOrgHeaders(organizationId || undefined);
           
           // Smart limit calculation for SCADA data (1 record/second = 86,400/day)
           const timeDifferenceHours = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
@@ -397,7 +398,7 @@ export function useFurnaceReports() {
           
           // Read the file content to save to database
           fileContent = await FileSystem.readAsStringAsync(filePath, {
-            encoding: FileSystem.EncodingType.Base64,
+            encoding: 'base64' as any,
           });
         } else {
           throw new Error(`Unsupported format: ${format}`);
@@ -409,7 +410,7 @@ export function useFurnaceReports() {
         const fileSize = fileInfo.exists && !fileInfo.isDirectory ? fileInfo.size : 0;
         
         // Save to database
-        const headers = await getOrgHeaders(organizationId);
+        const headers = await getOrgHeaders(organizationId || undefined);
         console.log('Attempting to save report to database...');
         console.log('Headers:', headers);
         console.log('Report title:', reportTitle);
@@ -593,7 +594,7 @@ export function useFurnaceReports() {
   const openReport = useCallback(async (reportId: string): Promise<void> => {
     try {
       // 1️⃣ Download the file
-      const headers = await getOrgHeaders(organizationId);
+      const headers = await getOrgHeaders(organizationId || undefined);
       const response = await axios.get(`${apiConfig.apiUrl}/api/reports/furnace/${reportId}`, {
         headers,
         responseType: 'arraybuffer'
@@ -604,7 +605,7 @@ export function useFurnaceReports() {
       const meta = cached?.find(r => r.id === reportId);
       if (!meta) throw new Error('Report metadata not found');
       
-      const fileUri = FileSystem.documentDirectory + meta.fileName;
+      const fileUri = (FileSystem.documentDirectory || '') + meta.fileName;
       
       // 3️⃣ Convert arraybuffer to base64 and write to file
       // Convert ArrayBuffer to base64
@@ -614,7 +615,7 @@ export function useFurnaceReports() {
       );
       
       await FileSystem.writeAsStringAsync(fileUri, base64String, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: 'base64' as any,
       });
       
       const mime = meta.format === 'excel'
@@ -656,14 +657,14 @@ export function useFurnaceReports() {
   // Share report from database
   const shareReport = useCallback(async (reportId: string): Promise<void> => {
     try {
-      const headers = await getOrgHeaders(organizationId);
+      const headers = await getOrgHeaders(organizationId || undefined);
       const response = await axios.get(`${apiConfig.apiUrl}/api/reports/furnace/${reportId}`, {
         headers,
         responseType: 'arraybuffer'
       });
 
       const fileName = `furnace_report_${reportId}.xlsx`;
-      const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+      const fileUri = `${FileSystem.documentDirectory || ''}${fileName}`;
       
       // Convert ArrayBuffer to base64
       const base64String = btoa(
@@ -672,7 +673,7 @@ export function useFurnaceReports() {
       );
       
       await FileSystem.writeAsStringAsync(fileUri, base64String, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: 'base64' as any,
       });
       
       await Sharing.shareAsync(fileUri, {

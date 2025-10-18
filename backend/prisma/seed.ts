@@ -22,7 +22,7 @@ async function main() {
   const organizationId = defaultOrg.id;
 
   // 2. Seed SUPER_ADMIN user if not present
-  const superAdminEmail = 'superadmin@eaglenotifier.com';
+  const superAdminEmail = 'superadmin@avyi.com';
   const superAdminPassword = 'SuperSecure123!'; // Change after first login
   const superAdminName = 'Super Admin';
   const existingSuperAdmin = await prisma.user.findFirst({ where: { role: 'SUPER_ADMIN' } });

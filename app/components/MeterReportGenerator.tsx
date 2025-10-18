@@ -204,11 +204,11 @@ export function MeterReportGenerator({
           {
             backgroundColor: isSelected
               ? isDarkMode
-                ? '#10B981'
-                : '#059669'
+                ? '#22c55e'
+                : '#16a34a'
               : isDarkMode
-              ? '#374151'
-              : '#F3F4F6',
+              ? '#334155'
+              : '#f1f5f9',
           },
         ]}
         onPress={onPress}
@@ -306,11 +306,11 @@ export function MeterReportGenerator({
                     backgroundColor:
                       format === ReportFormat.EXCEL
                         ? isDarkMode
-                          ? '#10B981'
-                          : '#059669'
+                          ? '#22c55e'
+                          : '#16a34a'
                         : isDarkMode
-                        ? '#374151'
-                        : '#F3F4F6',
+                        ? '#334155'
+                        : '#f1f5f9',
                   },
                 ]}
                 onPress={() => setFormat(ReportFormat.EXCEL)}
@@ -351,11 +351,11 @@ export function MeterReportGenerator({
                     backgroundColor:
                       format === ReportFormat.PDF
                         ? isDarkMode
-                          ? '#EF4444'
-                          : '#DC2626'
+                          ? '#ef4444'
+                          : '#dc2626'
                         : isDarkMode
-                        ? '#374151'
-                        : '#F3F4F6',
+                        ? '#334155'
+                        : '#f1f5f9',
                     opacity: 0.5, // Disabled for now
                   },
                 ]}
@@ -622,11 +622,11 @@ export function MeterReportGenerator({
                     backgroundColor:
                       sortOrder === SortOrder.NEWEST_FIRST
                         ? isDarkMode
-                          ? '#10B981'
-                          : '#059669'
+                          ? '#22c55e'
+                          : '#16a34a'
                         : isDarkMode
-                        ? '#374151'
-                        : '#F3F4F6',
+                        ? '#334155'
+                        : '#f1f5f9',
                   },
                 ]}
                 onPress={() => setSortOrder(SortOrder.NEWEST_FIRST)}
@@ -667,11 +667,11 @@ export function MeterReportGenerator({
                     backgroundColor:
                       sortOrder === SortOrder.OLDEST_FIRST
                         ? isDarkMode
-                          ? '#10B981'
-                          : '#059669'
+                          ? '#22c55e'
+                          : '#16a34a'
                         : isDarkMode
-                        ? '#374151'
-                        : '#F3F4F6',
+                        ? '#334155'
+                        : '#f1f5f9',
                   },
                 ]}
                 onPress={() => setSortOrder(SortOrder.OLDEST_FIRST)}
@@ -712,7 +712,7 @@ export function MeterReportGenerator({
               style={[
                 styles.cancelButton,
                 {
-                  backgroundColor: isDarkMode ? '#374151' : '#F3F4F6',
+                  backgroundColor: isDarkMode ? '#334155' : '#f1f5f9',
                 },
               ]}
               onPress={onClose}
@@ -735,11 +735,11 @@ export function MeterReportGenerator({
                   backgroundColor:
                     format === ReportFormat.EXCEL
                       ? isDarkMode
-                        ? '#10B981'
-                        : '#059669'
+                        ? '#22c55e'
+                        : '#16a34a'
                       : isDarkMode
-                      ? '#EF4444'
-                      : '#DC2626',
+                      ? '#ef4444'
+                      : '#dc2626',
                   opacity: isGenerating ? 0.7 : 1,
                 },
               ]}

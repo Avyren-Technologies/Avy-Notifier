@@ -1,4 +1,4 @@
-name: CI/CD for Eagle-Notifier IIS Deployment
+name: CI/CD for Avy I IIS Deployment
 
 on:
   push:
@@ -137,21 +137,21 @@ jobs:
           fi
           
           # Create a compressed archive for faster transfer
-          tar -czf eagle-notifier-deployment.tar.gz -C deployment-package .
+          tar -czf avyi-deployment.tar.gz -C deployment-package .
           
           # Verify deployment package contents
           echo "Deployment package contents:"
           ls -la deployment-package/
           echo "Compressed archive size:"
-          ls -lh eagle-notifier-deployment.tar.gz
+          ls -lh avyi-deployment.tar.gz
           echo "Prisma client in deployment package:"
           ls -la deployment-package/dist/src/generated/prisma-client/ 2>/dev/null || echo "⚠️ Prisma client structure issue"
           
       - name: Upload deployment artifact
         uses: actions/upload-artifact@v4
         with:
-          name: eagle-notifier-deployment
-          path: backend/eagle-notifier-deployment.tar.gz
+          name: avyi-deployment
+          path: backend/avyi-deployment.tar.gz
           retention-days: 1
 
   deploy:
@@ -163,7 +163,7 @@ jobs:
       - name: Download deployment artifact
         uses: actions/download-artifact@v4
         with:
-          name: eagle-notifier-deployment
+          name: avyi-deployment
           path: C:\temp\
         env:
           NODE_OPTIONS: "--no-deprecation"
@@ -174,20 +174,20 @@ jobs:
           cd C:\temp\
           
           # ✅ Create the directory first
-          if (Test-Path "eagle-notifier-deployment") {
-              Remove-Item -Path "eagle-notifier-deployment" -Recurse -Force
+          if (Test-Path "avyi-deployment") {
+              Remove-Item -Path "avyi-deployment" -Recurse -Force
               Write-Host "Removed existing extraction directory"
           }
-          New-Item -ItemType Directory -Path "eagle-notifier-deployment" -Force | Out-Null
+          New-Item -ItemType Directory -Path "avyi-deployment" -Force | Out-Null
           
           # ✅ Now extract to the created directory
-          tar -xzf eagle-notifier-deployment.tar.gz -C eagle-notifier-deployment\
+          tar -xzf avyi-deployment.tar.gz -C avyi-deployment\
           
           # Verify extraction
-          if (Test-Path "eagle-notifier-deployment\dist") {
+          if (Test-Path "avyi-deployment\dist") {
               Write-Host "✅ Deployment package extracted successfully"
               Write-Host "Contents:"
-              Get-ChildItem "eagle-notifier-deployment" | Format-Table Name -AutoSize
+              Get-ChildItem "avyi-deployment" | Format-Table Name -AutoSize
           } else {
               Write-Host "❌ Extraction failed - dist folder not found"
               exit 1
@@ -202,28 +202,28 @@ jobs:
           # Use alternative method to check for application pool existence
           $poolExists = $false
           try {
-              $poolState = Get-WebAppPoolState -Name "EagleNotifierPool" -ErrorAction SilentlyContinue
+              $poolState = Get-WebAppPoolState -Name "AvyIPool" -ErrorAction SilentlyContinue
               $poolExists = $true
-              Write-Host "Application pool 'EagleNotifierPool' exists"
+              Write-Host "Application pool 'AvyIPool' exists"
           } catch {
-              Write-Host "Application pool 'EagleNotifierPool' does not exist"
+              Write-Host "Application pool 'AvyIPool' does not exist"
           }
           
           # Create application pool if it doesn't exist
           if (-not $poolExists) {
-              New-WebAppPool -Name "EagleNotifierPool"
-              Set-ItemProperty -Path "IIS:\AppPools\EagleNotifierPool" -Name "processModel.identityType" -Value "ApplicationPoolIdentity"
-              Set-ItemProperty -Path "IIS:\AppPools\EagleNotifierPool" -Name "recycling.periodicRestart.time" -Value "00:00:00"
-              Write-Host "Created new application pool: EagleNotifierPool"
+              New-WebAppPool -Name "AvyIPool"
+              Set-ItemProperty -Path "IIS:\AppPools\AvyIPool" -Name "processModel.identityType" -Value "ApplicationPoolIdentity"
+              Set-ItemProperty -Path "IIS:\AppPools\AvyIPool" -Name "recycling.periodicRestart.time" -Value "00:00:00"
+              Write-Host "Created new application pool: AvyIPool"
           }
           
           # Stop the application pool if it's running
-          $poolState = Get-WebAppPoolState -Name "EagleNotifierPool"
+          $poolState = Get-WebAppPoolState -Name "AvyIPool"
           if ($poolState.Value -eq "Started") {
-              Stop-WebAppPool -Name "EagleNotifierPool"
+              Stop-WebAppPool -Name "AvyIPool"
               do {
                   Start-Sleep -Seconds 2
-                  $poolState = Get-WebAppPoolState -Name "EagleNotifierPool"
+                  $poolState = Get-WebAppPoolState -Name "AvyIPool"
                   Write-Host "Waiting for application pool to stop... Current state: $($poolState.Value)"
               } while ($poolState.Value -ne "Stopped")
               Write-Host "Application pool stopped successfully"
@@ -237,9 +237,9 @@ jobs:
           Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
           Import-Module WebAdministration -Force
 
-          $siteName   = "EagleNotifier"
-          $sitePath   = "C:\inetpub\wwwroot\eagle-notifier"
-          $hostHeader = "eagle-notifier"
+          $siteName   = "AvyI"
+          $sitePath   = "C:\inetpub\wwwroot\avyi"
+          $hostHeader = "avyi"
           $port       = 8080
 
           # Build canonical bindingInformation without using $ inside a literal string
@@ -265,11 +265,11 @@ jobs:
 
           if ($existingWebsite) {
               Write-Host "✅ Website '$siteName' exists (ID: $($existingWebsite.ID))"
-              Set-ItemProperty -Path "IIS:\Sites\$siteName" -Name "applicationPool" -Value "EagleNotifierPool"
+              Set-ItemProperty -Path "IIS:\Sites\$siteName" -Name "applicationPool" -Value "AvyIPool"
               Set-ItemProperty -Path "IIS:\Sites\$siteName" -Name "physicalPath" -Value $sitePath
               Write-Host "Website updated successfully"
           } else {
-              New-Website -Name $siteName -ApplicationPool "EagleNotifierPool" -PhysicalPath $sitePath -Port $port -HostHeader $hostHeader
+              New-Website -Name $siteName -ApplicationPool "AvyIPool" -PhysicalPath $sitePath -Port $port -HostHeader $hostHeader
               Write-Host "Website created successfully with host header $hostHeader"
           }
 
@@ -298,7 +298,7 @@ jobs:
           Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
           Import-Module WebAdministration -Force
           
-          $siteName = "EagleNotifier"
+          $siteName = "AvyI"
           $port = 8080
           $ipAddress = "103.12.1.157"
           
@@ -327,16 +327,16 @@ jobs:
           }
           
           # Verify final configuration
-          Write-Host "`nFinal EagleNotifier bindings:"
+          Write-Host "`nFinal AvyI bindings:"
           Get-WebBinding -Name $siteName | Format-Table protocol, bindingInformation -AutoSize
         shell: powershell      
         
       - name: Backup current deployment
         run: |
           Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
-          $deployPath = "C:\inetpub\wwwroot\eagle-notifier"
+          $deployPath = "C:\inetpub\wwwroot\avyi"
           $backupDir = "C:\backups"
-          $backupPath = "$backupDir\eagle-notifier-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+          $backupPath = "$backupDir\avyi-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
           
           # Create backup directory if it doesn't exist
           if (-not (Test-Path $backupDir)) {
@@ -354,8 +354,8 @@ jobs:
       - name: Deploy application files
         run: |
           Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
-          $sourcePath = "C:\temp\eagle-notifier-deployment"
-          $deployPath = "C:\inetpub\wwwroot\eagle-notifier"
+          $sourcePath = "C:\temp\avyi-deployment"
+          $deployPath = "C:\inetpub\wwwroot\avyi"
           
           # Remove old deployment and copy new files
           if (Test-Path $deployPath) {
@@ -399,7 +399,7 @@ jobs:
       - name: Configure web.config
         run: |
           Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
-          $deployPath = "C:\inetpub\wwwroot\eagle-notifier"
+          $deployPath = "C:\inetpub\wwwroot\avyi"
           $webConfigTemplate = Get-Content "$deployPath\web.config.template" -Raw
           
           $webConfig = $webConfigTemplate `
@@ -429,11 +429,11 @@ jobs:
           Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
           Import-Module WebAdministration -Force
           
-          Start-WebAppPool -Name "EagleNotifierPool"
+          Start-WebAppPool -Name "AvyIPool"
           
           do {
               Start-Sleep -Seconds 2
-              $poolState = Get-WebAppPoolState -Name "EagleNotifierPool"
+              $poolState = Get-WebAppPoolState -Name "AvyIPool"
               Write-Host "Waiting for application pool to start... Current state: $($poolState.Value)"
           } while ($poolState.Value -ne "Started")
           
@@ -443,11 +443,10 @@ jobs:
       - name: Ensure hosts entry for eagle-notifier
         run: |
           $hostsPath = "$env:WinDir\System32\drivers\etc\hosts"
-          # ✅ CORRECTED - Remove the typo in eagle-notifier
-          $line = "127.0.0.1 eagle-notifier"  # Fixed the backtick typo
+          $line = "127.0.0.1 avyi"
           
           Write-Host "Checking hosts file: $hostsPath"
-          if (-not (Select-String -Path $hostsPath -Pattern '^\s*127\.0\.0\.1\s+eagle-notifier\s*$' -Quiet)) {
+          if (-not (Select-String -Path $hostsPath -Pattern '^\s*127\.0\.0\.1\s+avyi\s*$' -Quiet)) {
               Write-Host "Adding hosts entry: $line"
               Add-Content -Path $hostsPath -Value ([Environment]::NewLine + $line)
               # flush DNS cache
@@ -459,10 +458,10 @@ jobs:
 
           # quick verify
           try {
-              $ip = [System.Net.Dns]::GetHostAddresses("eagle-notifier") | Select-Object -First 1
-              Write-Host "eagle-notifier resolves to: $ip"
+              $ip = [System.Net.Dns]::GetHostAddresses("avyi") | Select-Object -First 1
+              Write-Host "avyi resolves to: $ip"
           } catch {
-              Write-Warning "Could not resolve eagle-notifier via DNS API - but hosts file was modified."
+              Write-Warning "Could not resolve avyi via DNS API - but hosts file was modified."
           }
         shell: powershell
         
@@ -478,7 +477,7 @@ jobs:
           
           # Try multiple health check URLs in case of different configurations
           $healthUrls = @(
-              "http://eagle-notifier:8080/health",     # host-header binding (preferred)
+              "http://avyi:8080/health",     # host-header binding (preferred)
               "http://localhost:8080/health",  # explicit port
               "http://127.0.0.1:8080/health",          # fallback
               "http://103.12.1.157:8080/health"
@@ -522,27 +521,27 @@ jobs:
               Import-Module WebAdministration -Force
               Write-Host "Sites:"
               Get-Website | Format-Table Name, State, PhysicalPath, @{n='Bindings';e={$_.Bindings.Collection -join ';'}} -AutoSize
-              Write-Host "`nBindings for EagleNotifier:"
-              Get-WebBinding -Name "EagleNotifier" | Format-Table protocol, bindingInformation, sslFlags -AutoSize
+              Write-Host "`nBindings for AvyI:"
+              Get-WebBinding -Name "AvyI" | Format-Table protocol, bindingInformation, sslFlags -AutoSize
 
               Write-Host "`nListening ports (netstat):"
               netstat -ano | findstr ":80" | Select-String -Pattern "LISTENING" -Context 0,0 | Out-String | Write-Host
 
-              Write-Host "`nDNS resolution for eagle-notifier:"
+              Write-Host "`nDNS resolution for avyi:"
               try {
-                  [System.Net.Dns]::GetHostAddresses("eagle-notifier") | ForEach-Object { Write-Host $_.IPAddressToString }
+                  [System.Net.Dns]::GetHostAddresses("avyi") | ForEach-Object { Write-Host $_.IPAddressToString }
               } catch {
-                  Write-Warning "DNS resolution failed for eagle-notifier: $($_.Exception.Message)"
+                  Write-Warning "DNS resolution failed for avyi: $($_.Exception.Message)"
               }
 
               Write-Host "`nTail application logs (last 50 lines):"
-              if (Test-Path "C:\inetpub\wwwroot\eagle-notifier\logs") {
-                  Get-ChildItem "C:\inetpub\wwwroot\eagle-notifier\logs\*.log" | Where-Object {$_.Length -gt 0} | Sort-Object LastWriteTime -Descending | Select-Object -First 1 | ForEach-Object {
+              if (Test-Path "C:\inetpub\wwwroot\avyi\logs") {
+                  Get-ChildItem "C:\inetpub\wwwroot\avyi\logs\*.log" | Where-Object {$_.Length -gt 0} | Sort-Object LastWriteTime -Descending | Select-Object -First 1 | ForEach-Object {
                       Write-Host "=== $_.FullName ==="
                       Get-Content $_.FullName -Tail 50 | ForEach-Object { Write-Host $_ }
                   }
               } else {
-                  Write-Host "No logs directory found at C:\inetpub\wwwroot\eagle-notifier\logs"
+                  Write-Host "No logs directory found at C:\inetpub\wwwroot\avyi\logs"
               }
 
               Write-Host "Deployment completed, but health check failed. Check the application manually."

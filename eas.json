@@ -9,10 +9,10 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_PROJECT_ID": "72e44855-a2b8-4fb2-bacb-2a39760c6ccd",
-        "EXPO_PUBLIC_APP_VERSION": "1.3.5",
+        "EXPO_PUBLIC_PROJECT_ID": "82b3f1dd-e785-4428-b0ac-4070ea808e59",
+        "EXPO_PUBLIC_APP_VERSION": "1.0.0",
         "EXPO_PUBLIC_PUSH_NOTIFICATION_ENDPOINT": "/api/notifications/token",
-        "EXPO_PUBLIC_API_URL": "https://loginwaresofttec.com/eagle-notifier-backend/",
+        "EXPO_PUBLIC_API_URL": "http://192.168.0.1:3000",
         "EXPO_PUBLIC_SCADA_INTERVAL": "30000",
         "EXPO_ANDROID_TARGET_SDK_VERSION": "36",
         "NODE_ENV": "development"
@@ -23,7 +23,7 @@
       "distribution": "internal",
       "node": "22.14.0",
       "env": {
-        "EXPO_PUBLIC_PROJECT_ID": "72e44855-a2b8-4fb2-bacb-2a39760c6ccd",
+        "EXPO_PUBLIC_PROJECT_ID": "82b3f1dd-e785-4428-b0ac-4070ea808e59",
         "EXPO_PUBLIC_APP_VERSION": "1.3.5",
         "EXPO_PUBLIC_API_URL": "https://loginwaresofttec.com/eagle-notifier-backend/",
         "EXPO_PUBLIC_PUSH_NOTIFICATION_ENDPOINT": "/api/notifications/token",
@@ -37,7 +37,7 @@
       "autoIncrement": true,
       "node": "22.14.0",
       "env": {
-        "EXPO_PUBLIC_PROJECT_ID": "72e44855-a2b8-4fb2-bacb-2a39760c6ccd",
+        "EXPO_PUBLIC_PROJECT_ID": "82b3f1dd-e785-4428-b0ac-4070ea808e59",
         "EXPO_PUBLIC_APP_VERSION": "1.3.5",
         "EXPO_PUBLIC_API_URL": "https://loginwaresofttec.com/eagle-notifier-backend/",
         "EXPO_PUBLIC_PUSH_NOTIFICATION_ENDPOINT": "/api/notifications/token",

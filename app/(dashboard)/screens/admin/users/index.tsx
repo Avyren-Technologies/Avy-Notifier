@@ -269,7 +269,7 @@ export default function UserManagementScreen() {
       name: user.name,
       email: user.email,
       password: '', // Don't set the password, it will only be updated if a new one is provided
-      role: user.role,
+      role: user.role as UserRole,
     });
     setFormVisible(true);
   }, [authState.user]);

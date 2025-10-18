@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
+import { EncodingType } from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { Alert } from 'react-native';
 import { ReportFormat, ReportTimeRange } from '../components/ReportGenerator';
@@ -74,13 +75,13 @@ export function useReportGenerator(): ReportGeneratorReturnType {
         });
       } else if (format === 'pdf') {
         // Placeholder for PDF generation (future feature)
-        filePath = await FileSystem.documentDirectory + `${sanitizedTitle}_${timestamp}_${randomSuffix}.pdf`;
+        filePath = (FileSystem.documentDirectory || '') + `${sanitizedTitle}_${timestamp}_${randomSuffix}.pdf`;
         
         // Create a dummy PDF file for now
         await FileSystem.writeAsStringAsync(
           filePath,
           'PDF generation not implemented yet',
-          { encoding: FileSystem.EncodingType.UTF8 }
+          { encoding: EncodingType.UTF8 }
         );
       } else {
         throw new Error(`Unsupported format: ${format}`);

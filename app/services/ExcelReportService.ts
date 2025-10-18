@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx';
 import { Platform } from 'react-native';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { AlarmData } from '../hooks/useAlarmReportData';
 
@@ -533,12 +533,12 @@ export class ExcelReportService {
     });
     
     // Create file path
-    const filePath = `${FileSystem.documentDirectory}${filename}`;
+    const filePath = `${FileSystem.documentDirectory || ''}${filename}`;
     
     try {
       // Write file
       await FileSystem.writeAsStringAsync(filePath, wbout, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: 'base64' as any,
       });
       
       return filePath;

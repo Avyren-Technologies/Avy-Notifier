@@ -246,11 +246,19 @@ export function ReportGenerator({
           {
             backgroundColor: isSelected
               ? isDarkMode
-                ? '#3B82F6'
-                : '#2563EB'
+                ? '#0ea5e9'
+                : '#0284c7'
               : isDarkMode
-              ? '#374151'
-              : '#F3F4F6',
+              ? '#334155'
+              : '#f1f5f9',
+            borderWidth: 2,
+            borderColor: isSelected
+              ? isDarkMode
+                ? '#38bdf8'
+                : '#0ea5e9'
+              : isDarkMode
+              ? '#475569'
+              : '#e2e8f0',
           },
         ]}
         onPress={onPress}
@@ -260,10 +268,10 @@ export function ReportGenerator({
             styles.filterButtonText,
             {
               color: isSelected
-                ? '#FFFFFF'
+                ? '#ffffff'
                 : isDarkMode
-                ? '#D1D5DB'
-                : '#4B5563',
+                ? '#cbd5e1'
+                : '#475569',
             },
           ]}
         >
@@ -279,14 +287,18 @@ export function ReportGenerator({
         <View
           style={[
             styles.modalContent,
-            { backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF' },
+            { 
+              backgroundColor: isDarkMode ? '#1e293b' : '#ffffff',
+              borderWidth: 2,
+              borderColor: isDarkMode ? '#334155' : '#e2e8f0',
+            },
           ]}
         >
           <View style={styles.header}>
             <Text
               style={[
                 styles.title,
-                { color: isDarkMode ? '#F9FAFB' : '#111827' },
+                { color: isDarkMode ? '#f8fafc' : '#0f172a' },
               ]}
             >
               Generate Report
@@ -294,14 +306,18 @@ export function ReportGenerator({
             <TouchableOpacity
               style={[
                 styles.closeButton,
-                { backgroundColor: isDarkMode ? '#374151' : '#F3F4F6' },
+                { 
+                  backgroundColor: isDarkMode ? '#334155' : '#f1f5f9',
+                  borderWidth: 1,
+                  borderColor: isDarkMode ? '#475569' : '#e2e8f0',
+                },
               ]}
               onPress={onClose}
             >
               <Ionicons
                 name="close"
                 size={20}
-                color={isDarkMode ? '#9CA3AF' : '#6B7280'}
+                color={isDarkMode ? '#94a3b8' : '#64748b'}
               />
             </TouchableOpacity>
           </View>
@@ -311,7 +327,7 @@ export function ReportGenerator({
             <Text
               style={[
                 styles.sectionTitle,
-                { color: isDarkMode ? '#E5E7EB' : '#1F2937' },
+                { color: isDarkMode ? '#e2e8f0' : '#0f172a' },
               ]}
             >
               Report Format
@@ -324,11 +340,19 @@ export function ReportGenerator({
                     backgroundColor:
                       format === 'excel'
                         ? isDarkMode
-                          ? '#3B82F6'
-                          : '#2563EB'
+                          ? '#0ea5e9'
+                          : '#0284c7'
                         : isDarkMode
-                        ? '#374151'
-                        : '#F3F4F6',
+                        ? '#334155'
+                        : '#f1f5f9',
+                    borderWidth: 2,
+                    borderColor: format === 'excel'
+                      ? isDarkMode
+                        ? '#38bdf8'
+                        : '#0ea5e9'
+                      : isDarkMode
+                      ? '#475569'
+                      : '#e2e8f0',
                   },
                 ]}
                 onPress={() => setFormat('excel')}
@@ -351,10 +375,10 @@ export function ReportGenerator({
                     {
                       color:
                         format === 'excel'
-                          ? '#FFFFFF'
+                          ? '#ffffff'
                           : isDarkMode
-                          ? '#D1D5DB'
-                          : '#4B5563',
+                          ? '#cbd5e1'
+                          : '#475569',
                     },
                   ]}
                 >
@@ -763,10 +787,10 @@ export function ReportGenerator({
                       value={includeThresholds}
                       onValueChange={setIncludeThresholds}
                       trackColor={{
-                        false: isDarkMode ? '#4B5563' : '#D1D5DB',
-                        true: isDarkMode ? '#3B82F6' : '#2563EB',
+                        false: isDarkMode ? '#475569' : '#e2e8f0',
+                        true: isDarkMode ? '#0ea5e9' : '#0284c7',
                       }}
-                      thumbColor={isDarkMode ? '#E5E7EB' : '#FFFFFF'}
+                      thumbColor={isDarkMode ? '#f1f5f9' : '#FFFFFF'}
                     />
                   </View>
 
@@ -783,10 +807,10 @@ export function ReportGenerator({
                       value={includeStatusFields}
                       onValueChange={setIncludeStatusFields}
                       trackColor={{
-                        false: isDarkMode ? '#4B5563' : '#D1D5DB',
-                        true: isDarkMode ? '#3B82F6' : '#2563EB',
+                        false: isDarkMode ? '#475569' : '#e2e8f0',
+                        true: isDarkMode ? '#0ea5e9' : '#0284c7',
                       }}
-                      thumbColor={isDarkMode ? '#E5E7EB' : '#FFFFFF'}
+                      thumbColor={isDarkMode ? '#f1f5f9' : '#FFFFFF'}
                     />
                   </View>
                 </View>
@@ -799,7 +823,9 @@ export function ReportGenerator({
               style={[
                 styles.cancelButton,
                 {
-                  backgroundColor: isDarkMode ? '#374151' : '#F3F4F6',
+                  backgroundColor: isDarkMode ? '#334155' : '#f1f5f9',
+                  borderWidth: 2,
+                  borderColor: isDarkMode ? '#475569' : '#e2e8f0',
                 },
               ]}
               onPress={onClose}
@@ -808,7 +834,7 @@ export function ReportGenerator({
               <Text
                 style={[
                   styles.cancelButtonText,
-                  { color: isDarkMode ? '#E5E7EB' : '#4B5563' },
+                  { color: isDarkMode ? '#e2e8f0' : '#475569' },
                 ]}
               >
                 Cancel
@@ -822,12 +848,17 @@ export function ReportGenerator({
                   backgroundColor:
                     format === 'excel'
                       ? isDarkMode
-                        ? '#3B82F6'
-                        : '#2563EB'
+                        ? '#0ea5e9'
+                        : '#0284c7'
                       : isDarkMode
-                      ? '#EF4444'
-                      : '#DC2626',
+                      ? '#ef4444'
+                      : '#dc2626',
                   opacity: isGenerating ? 0.7 : 1,
+                  shadowColor: isDarkMode ? '#0ea5e9' : '#0284c7',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 6,
                 },
               ]}
               onPress={handleGenerateReport}
@@ -859,7 +890,7 @@ const styles = StyleSheet.create({
     width: '90%',
     maxWidth: 500,
     maxHeight: '90%',
-    borderRadius: 12,
+    borderRadius: 20,
     overflow: 'hidden',
   },
   header: {
@@ -875,9 +906,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -900,8 +931,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 12,
-    borderRadius: 8,
+    padding: 14,
+    borderRadius: 16,
     flex: 1,
     marginHorizontal: 4,
   },
@@ -947,9 +978,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   filterButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 20,
     margin: 4,
   },
   filterButtonText: {
@@ -978,9 +1009,9 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(107, 114, 128, 0.1)',
   },
   cancelButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 16,
     marginRight: 12,
   },
   cancelButtonText: {
@@ -988,10 +1019,10 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   generateButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    minWidth: 120,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 16,
+    minWidth: 140,
     justifyContent: 'center',
     alignItems: 'center',
   },

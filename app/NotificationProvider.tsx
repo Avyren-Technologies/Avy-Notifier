@@ -8,9 +8,10 @@ import { PROJECT_ID } from './api/config';
 // Set up notification handler with non-deprecated properties
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 

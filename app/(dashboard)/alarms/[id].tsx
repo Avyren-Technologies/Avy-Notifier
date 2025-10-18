@@ -10,6 +10,7 @@ import {
   Dimensions,
   Platform,
   Modal,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -23,6 +24,8 @@ import { useSpecificAlarmHistory } from '../../hooks/useAlarms';
 import { Alarm } from '../../types/alarm';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { formatFullDateTimeIST, formatTimestampWithSecondsIST } from '../../utils/timezoneUtils';
+import { LinearGradient } from 'expo-linear-gradient';
+import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../constants/theme';
 
 // Filter types for alarm history
 type AlarmFilter = 'active' | 'acknowledged' | 'resolved' | 'all';
@@ -942,29 +945,78 @@ export default function AlarmDetailScreen() {
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? '#111827' : '#F9FAFB' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: isDarkMode ? '#0F172A' : '#F8FAFC' }]}>
       <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+
+      {/* Modern Background Gradient */}
+      <LinearGradient
+        colors={
+          isDarkMode
+            ? ['#0F172A', '#1E293B', '#312E81', '#1E293B']
+            : ['#F8FAFC', '#EFF6FF', '#E0E7FF', '#F8FAFC']
+        }
+        style={StyleSheet.absoluteFillObject}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      />
+
+      {/* Floating Background Elements */}
+      <View style={styles.floatingElements}>
+        <View style={styles.orb1}>
+          <LinearGradient
+            colors={['#6366F1', '#8B5CF6']}
+            style={styles.orbGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+        </View>
+        <View style={styles.orb2}>
+          <LinearGradient
+            colors={['#D946EF', '#F0ABFC']}
+            style={styles.orbGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          />
+        </View>
+      </View>
       
-      {/* Header */}
-      <View style={styles.header}>
+      {/* Modern Header */}
+      <View style={[
+        styles.header,
+        {
+          backgroundColor: isDarkMode ? 'rgba(30, 41, 59, 0.95)' : 'rgba(248, 250, 252, 0.95)',
+          borderBottomColor: isDarkMode ? 'rgba(51, 65, 85, 0.3)' : 'rgba(226, 232, 240, 0.8)',
+          borderBottomWidth: 1,
+        }
+      ]}>
         <TouchableOpacity
-          style={[styles.backButton, { backgroundColor: isDarkMode ? '#1F2937' : '#F3F4F6' }]}
+          style={[
+            styles.backButton,
+            { backgroundColor: isDarkMode ? 'rgba(51, 65, 85, 0.6)' : 'rgba(255, 255, 255, 0.8)' }
+          ]}
           onPress={() => router.back()}
         >
           <Ionicons
             name="arrow-back"
-            size={20}
-            color={isDarkMode ? '#E5E7EB' : '#4B5563'}
+            size={22}
+            color={isDarkMode ? '#F8FAFC' : '#0F172A'}
           />
         </TouchableOpacity>
         
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.headerTitle, { color: isDarkMode ? '#FFFFFF' : '#1F2937' }]}>
+        <View style={styles.headerTextContainer}>
+          <Text style={[styles.headerTitle, { color: isDarkMode ? '#F8FAFC' : '#0F172A' }]}>
             {alarmSummary?.description || 'Alarm History'}
           </Text>
-          <Text style={[styles.headerSubtitle, { color: isDarkMode ? '#9CA3AF' : '#6B7280' }]}>
-            {alarmSummary ? `${alarmSummary.type}${alarmSummary.zone ? ` (${alarmSummary.zone})` : ''} alarm history` : 'Loading...'}
-          </Text>
+          <LinearGradient
+            colors={['#6366F1', '#8B5CF6', '#D946EF']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.subtitleGradient}
+          >
+            <Text style={styles.headerSubtitle}>
+              {alarmSummary ? `${alarmSummary.type}${alarmSummary.zone ? ` (${alarmSummary.zone})` : ''} alarm history` : 'Loading...'}
+            </Text>
+          </LinearGradient>
         </View>
       </View>
       
@@ -1086,7 +1138,7 @@ export default function AlarmDetailScreen() {
         <FlashList
           data={alarmHistoryItems}
           renderItem={renderAlarmItem}
-          estimatedItemSize={150}
+          {...({ estimatedItemSize: 150 } as any)}
           contentContainerStyle={styles.listContainer}
           refreshControl={
             <RefreshControl
@@ -1228,26 +1280,90 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  floatingElements: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  orb1: {
+    position: 'absolute',
+    top: -100,
+    right: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    opacity: 0.15,
+  },
+  orb2: {
+    position: 'absolute',
+    bottom: -150,
+    left: -100,
+    width: 350,
+    height: 350,
+    borderRadius: 175,
+    opacity: 0.12,
+  },
+  orbGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 9999,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  headerTextContainer: {
+    flex: 1,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  subtitleGradient: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 16,
+    alignSelf: 'flex-start',
   },
   headerSubtitle: {
     fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   searchContainer: {
     flexDirection: 'row',

@@ -33,6 +33,8 @@ import { useSetpoints, useUpdateSetpoint, Setpoint } from '../../hooks/useSetpoi
 import { SetpointConfigModal } from '../../components/SetpointConfigModal';
 import { useMaintenance } from '../../context/MaintenanceContext';
 import { useUnreadCount } from '../../hooks/useNotifications';
+import { LinearGradient } from 'expo-linear-gradient';
+import { getTheme, Colors, Shadows, BorderRadius } from '../../constants/theme';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const DEVICE_WIDTH = Dimensions.get('window').width;
@@ -45,44 +47,44 @@ const ADMIN_ROUTES = {
   userManagement: '(dashboard)/screens/admin/users'
 } as const;
 
-// Theme Colors
+// Modern Theme Colors - Using new color system
 const THEME = {
   dark: {
-    primary: '#1E3A8A',
-    secondary: '#2563EB',
-    accent: '#3B82F6',
+    primary: Colors.primary[500],
+    secondary: Colors.secondary[500],
+    accent: Colors.accent[500],
     background: '#0F172A',
     cardBg: '#1E293B',
     text: {
       primary: '#F8FAFC',
-      secondary: '#94A3B8',
-      accent: '#60A5FA'
+      secondary: '#CBD5E1',
+      accent: Colors.primary[400]
     },
     status: {
       normal: '#1E293B',
-      warning: '#FFEB3B',
-      critical: '#FF0000', 
-      success: '#4CAF50'
+      warning: Colors.warning[500],
+      critical: Colors.error[500], 
+      success: Colors.success[500]
     },
     border: '#334155',
     shadow: 'rgba(0, 0, 0, 0.25)'
   },
   light: {
-    primary: '#2563EB',
-    secondary: '#3B82F6',
-    accent: '#60A5FA',
+    primary: Colors.primary[500],
+    secondary: Colors.secondary[500],
+    accent: Colors.accent[500],
     background: '#F8FAFC',
     cardBg: '#FFFFFF',
     text: {
-      primary: '#1E293B',
+      primary: '#0F172A',
       secondary: '#475569',
-      accent: '#2563EB'
+      accent: Colors.primary[600]
     },
     status: {
       normal: '#F1F5F9',
-      warning: '#FDE68A',
-      critical: '#FEE2E2',
-      success: '#DCFCE7'
+      warning: Colors.warning[100],
+      critical: Colors.error[100],
+      success: Colors.success[100]
     },
     border: '#E2E8F0',
     shadow: 'rgba(0, 0, 0, 0.1)'

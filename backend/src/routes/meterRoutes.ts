@@ -651,8 +651,8 @@ router.post('/reports', authenticate, asyncHandler(async (req: Request, res: Res
         // Create Excel workbook
         console.log('📊 Creating Excel workbook...');
         const workbook = new ExcelJS.Workbook();
-        workbook.creator = 'Eagle Notifier';
-        workbook.lastModifiedBy = 'Eagle Notifier';
+        workbook.creator = 'Avy I';
+        workbook.lastModifiedBy = 'Avy I';
         workbook.created = new Date();
         workbook.modified = new Date();
         

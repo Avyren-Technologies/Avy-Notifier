@@ -79,7 +79,7 @@ app.get('/', (_req, res) => {
     <html lang="en">
       <head>
         <meta charset="UTF-8" />
-        <title>Welcome - Eagle Notifier API</title>
+        <title>Welcome - Avy I API</title>
         <style>
           body {
             background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
@@ -128,10 +128,10 @@ app.get('/', (_req, res) => {
       </head>
       <body>
         <div class="container">
-          <h1>🚀 Eagle Notifier API</h1>
+          <h1>🚀 Avy I API</h1>
           <div class="success">✅ Server is running successfully!</div>
           <div class="api-info">
-            <p>Welcome to the <b>Eagle Notifier</b> backend.<br/>
+            <p>Welcome to the <b>Avy I</b> backend.<br/>
             Your API is up and ready to serve requests.</p>
             <p style="margin-top:1rem;font-size:0.95rem;opacity:0.7;">
               <span>Environment: <b>${process.env.NODE_ENV || 'development'}</b></span><br/>
@@ -161,7 +161,7 @@ app.get('/deployment-test', (req, res) => {
     <html lang="en">
       <head>
         <meta charset="UTF-8" />
-        <title>CI/CD Deployment Test - Eagle Notifier</title>
+        <title>CI/CD Deployment Test - Avy I</title>
         <style>
           body {
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
@@ -224,7 +224,7 @@ app.get('/deployment-test', (req, res) => {
           <div class="meta">Timestamp: <strong>${new Date().toISOString()}</strong></div>
           <div class="meta">Deployment Test: <strong style="color:#4ade80;">true</strong></div>
           <div class="footer">
-            Eagle Notifier &mdash; <span style="color:#38bdf8;">API Deployment</span>
+            Avy I &mdash; <span style="color:#38bdf8;">API Deployment</span>
           </div>
         </div>
       </body>

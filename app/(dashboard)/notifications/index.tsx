@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
-  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -36,7 +35,6 @@ export default function NotificationsScreen() {
   const {
     data,
     isLoading,
-    isError,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -447,11 +445,11 @@ export default function NotificationsScreen() {
       ) : (
         <FlashList
           data={sections}
-          estimatedItemSize={120}
-          renderItem={({ item }) => (
+          {...({ estimatedItemSize: 120 } as any)}
+          renderItem={({ item }: { item: { title: string; data: Notification[] } }) => (
             <View>
               {renderSectionHeader({ section: item })}
-              {item.data.map((notification) => (
+              {item.data.map((notification: Notification) => (
                 <View key={notification.id}>
                   {renderNotificationItem({ item: notification })}
                 </View>
@@ -476,8 +474,6 @@ export default function NotificationsScreen() {
     </SafeAreaView>
   );
 }
-
-const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {

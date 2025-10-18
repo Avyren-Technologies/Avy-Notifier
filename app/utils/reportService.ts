@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as Notifications from 'expo-notifications';
@@ -9,7 +9,7 @@ import { generateReportHtml } from './pdfGenerator';
 import { ReportData, ReportFilters, reportsApi } from '../api/reportsApi';
 import { ReportFormat, ReportTimeRange } from '../components/ReportGenerator';
 
-const DOWNLOADS_DIRECTORY = `${FileSystem.documentDirectory}downloads/`;
+const DOWNLOADS_DIRECTORY = `${FileSystem.documentDirectory || ''}downloads/`;
 
 /**
  * Custom error classes for better error handling
@@ -200,9 +200,10 @@ export const reportService = {
     // Set up notification handler for when user taps on notification
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
-        shouldShowAlert: true,
         shouldPlaySound: true,
         shouldSetBadge: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
       }),
     });
     

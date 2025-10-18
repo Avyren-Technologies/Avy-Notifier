@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
+import { EncodingType } from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { Alert, Linking, Platform } from 'react-native';
@@ -256,7 +257,7 @@ export function useMeterReports() {
       }
       
       // Create a temporary file
-      const fileUri = FileSystem.documentDirectory + reportMetadata.fileName;
+      const fileUri = (FileSystem.documentDirectory || '') + reportMetadata.fileName;
       
       // Convert blob to base64 and write to file
       const reader = new FileReader();
@@ -268,7 +269,7 @@ export function useMeterReports() {
         }
         
         await FileSystem.writeAsStringAsync(fileUri, base64data, {
-          encoding: FileSystem.EncodingType.Base64,
+          encoding: EncodingType.Base64,
         });
         
         // Open the file
@@ -297,7 +298,7 @@ export function useMeterReports() {
       }
       
       // Create a temporary file
-      const fileUri = FileSystem.documentDirectory + reportMetadata.fileName;
+      const fileUri = (FileSystem.documentDirectory || '') + reportMetadata.fileName;
       
       // Convert blob to base64 and write to file
       const reader = new FileReader();
@@ -309,7 +310,7 @@ export function useMeterReports() {
         }
         
         await FileSystem.writeAsStringAsync(fileUri, base64data, {
-          encoding: FileSystem.EncodingType.Base64,
+          encoding: EncodingType.Base64,
         });
         
         // Share the file with proper mime type

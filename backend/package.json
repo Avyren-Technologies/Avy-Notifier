@@ -1,7 +1,7 @@
 {
   "name": "eagle-notifier-backend",
   "version": "1.0.0",
-  "description": "Eagle Notifier Backend",
+  "description": "Avy I Backend",
   "main": "server.ts",
   "scripts": {
     "start": "node dist/server.js",

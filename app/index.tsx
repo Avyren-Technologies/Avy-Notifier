@@ -1,60 +1,69 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Animated, Dimensions, Alert, ActivityIndicator } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import * as Notifications from 'expo-notifications';
-import { useTheme } from './context/ThemeContext';
-import * as SecureStore from 'expo-secure-store';
-import Constants from 'expo-constants';
-import * as Updates from 'expo-updates';
-import { UpdateModal } from './components/UpdateModal';
-import { apiConfig, PROJECT_ID } from './api/config';
+import React, { useCallback, useRef, useState } from "react"
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Animated,
+  Dimensions,
+  Alert,
+  ActivityIndicator,
+} from "react-native"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { StatusBar } from "expo-status-bar"
+import { useRouter } from "expo-router"
+import { Ionicons } from "@expo/vector-icons"
+import * as Notifications from "expo-notifications"
+import { useTheme } from "./context/ThemeContext"
+import * as SecureStore from "expo-secure-store"
+import * as Updates from "expo-updates"
+import { UpdateModal } from "./components/UpdateModal"
+import { apiConfig, PROJECT_ID } from "./api/config"
+import { LinearGradient } from "expo-linear-gradient"
+import Constants from "expo-constants"
 
 // Configure notification handler
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
-});
+})
 
-// Debug environment variables and API config
-console.log('=== ONBOARDING SCREEN DEBUG ===');
-console.log('Environment Variables:', {
+console.log("=== ONBOARDING SCREEN DEBUG ===")
+console.log("Environment Variables:", {
   EXPO_PUBLIC_API_URL: process.env.EXPO_PUBLIC_API_URL,
   EXPO_PUBLIC_APP_VERSION: process.env.EXPO_PUBLIC_APP_VERSION,
   EXPO_PUBLIC_PROJECT_ID: process.env.EXPO_PUBLIC_PROJECT_ID,
   NODE_ENV: process.env.NODE_ENV,
-});
-console.log('API Config:', apiConfig);
-console.log('==================================');
+})
+console.log("API Config:", apiConfig)
+console.log("==================================")
 
-// Define interface for FeatureItem props
 interface FeatureItemProps {
-  icon: keyof typeof Ionicons.glyphMap;
-  title: string;
-  description: string;
-  isDarkMode: boolean;
+  icon: keyof typeof Ionicons.glyphMap
+  title: string
+  description: string
+  isDarkMode: boolean
 }
 
 export default function OnboardingScreen() {
-  const { isDarkMode } = useTheme();
-  const insets = useSafeAreaInsets();
-  const router = useRouter();
-  const [isLoading, setLoading] = useState(false);
-  const [updateModalVisible, setUpdateModalVisible] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
+  const { isDarkMode } = useTheme()
+  const insets = useSafeAreaInsets()
+  const router = useRouter()
+  const [isLoading, setLoading] = useState(false)
+  const [updateModalVisible, setUpdateModalVisible] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false)
 
   // Animation values
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current
+  const slideAnim = useRef(new Animated.Value(50)).current
+  const scaleAnim = useRef(new Animated.Value(0.8)).current
 
   React.useEffect(() => {
-    // Start animations when component mounts
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -71,117 +80,119 @@ export default function OnboardingScreen() {
         duration: 1000,
         useNativeDriver: true,
       }),
-    ]).start();
-  }, []);
+    ]).start()
+  }, [])
 
   const requestNotificationPermission = useCallback(async () => {
     try {
-      // Set loading state
-      setLoading(true);
+      setLoading(true)
 
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
+      const { status: existingStatus } = await Notifications.getPermissionsAsync()
+      let finalStatus = existingStatus
 
-      // Only ask for permission if not already granted
-      if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync()
+        finalStatus = status
       }
 
-      if (finalStatus === 'granted') {
-        // Get push token
+      if (finalStatus === "granted") {
         try {
           const tokenData = await Notifications.getExpoPushTokenAsync({
             projectId: PROJECT_ID as string,
-          });
+          })
 
-          console.log('Expo push token:', tokenData.data);
-
-          // Save token for when user logs in
-          await SecureStore.setItemAsync('tempPushToken', tokenData.data);
+          console.log("Expo push token:", tokenData.data)
+          await SecureStore.setItemAsync("tempPushToken", tokenData.data)
         } catch (tokenError) {
-          console.error('Error getting push token:', tokenError);
+          console.error("Error getting push token:", tokenError)
         }
       } else {
-        // Permission not granted, but continue anyway
         Alert.alert(
-          'Notification Permission',
+          "Notification Permission",
           "You won't receive push notifications. You can enable them later in app settings.",
-          [{ text: 'OK' }]
-        );
-        console.log('Notification permission not granted');
+          [{ text: "OK" }],
+        )
+        console.log("Notification permission not granted")
       }
 
-      // Mark onboarding as seen
-      await SecureStore.setItemAsync('hasSeenOnboarding', 'true');
-
-      // Navigate to login screen regardless of permission status
-      router.replace('/(auth)/login');
+      await SecureStore.setItemAsync("hasSeenOnboarding", "true")
+      router.replace("/(auth)/login")
     } catch (error) {
-      console.error('Error requesting notification permission:', error);
-      // Mark onboarding as seen even if there's an error with notifications
-      await SecureStore.setItemAsync('hasSeenOnboarding', 'true');
-
-      // Navigate to login even if there's an error
-      router.replace('/(auth)/login');
+      console.error("Error requesting notification permission:", error)
+      await SecureStore.setItemAsync("hasSeenOnboarding", "true")
+      router.replace("/(auth)/login")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [router]);
+  }, [router])
 
-  // Update the manual check function
   const checkForUpdates = useCallback(async () => {
     try {
-      // Only check for updates in production
       if (!__DEV__ && Updates.isEnabled) {
-        const update = await Updates.checkForUpdateAsync();
+        const update = await Updates.checkForUpdateAsync()
         if (update.isAvailable) {
-          setUpdateModalVisible(true);
+          setUpdateModalVisible(true)
         } else {
-          Alert.alert(
-            "No Updates",
-            "You are running the latest version."
-          );
+          Alert.alert("No Updates", "You are running the latest version.")
         }
       } else {
-        Alert.alert(
-          "Development Mode",
-          "Updates are only available in production builds."
-        );
+        Alert.alert("Development Mode", "Updates are only available in production builds.")
       }
     } catch (error) {
-      Alert.alert(
-        "Error",
-        "Failed to check for updates. Please try again later."
-      );
-      console.log('Error checking for updates:', error);
+      Alert.alert("Error", "Failed to check for updates. Please try again later.")
+      console.log("Error checking for updates:", error)
     }
-  }, []);
+  }, [])
 
   const handleUpdate = async () => {
     try {
-      setIsDownloading(true);
-      await Updates.fetchUpdateAsync();
-      await Updates.reloadAsync();
+      setIsDownloading(true)
+      await Updates.fetchUpdateAsync()
+      await Updates.reloadAsync()
     } catch (error) {
-      console.log('Error fetching or reloading update:', error);
-      setIsDownloading(false);
-      setUpdateModalVisible(false);
-      Alert.alert(
-        "Error",
-        "Failed to download the update. Please try again later."
-      );
+      console.log("Error fetching or reloading update:", error)
+      setIsDownloading(false)
+      setUpdateModalVisible(false)
+      Alert.alert("Error", "Failed to download the update. Please try again later.")
     }
-  };
+  }
 
   return (
     <View
       style={[
         styles.container,
-        { backgroundColor: isDarkMode ? '#111827' : '#F3F4F6' },
+        { backgroundColor: isDarkMode ? "#0F172A" : "#F8FAFC" },
         { paddingTop: insets.top, paddingBottom: insets.bottom },
-      ]}>
-      <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+      ]}
+    >
+      <StatusBar style={isDarkMode ? "light" : "dark"} />
+
+      <LinearGradient
+        colors={
+          isDarkMode ? ["#0F172A", "#1E293B", "#312E81", "#1E293B"] : ["#F8FAFC", "#EFF6FF", "#E0E7FF", "#F8FAFC"]
+        }
+        style={StyleSheet.absoluteFillObject}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      />
+
+      {/* Floating Orbs */}
+      <View style={styles.orb1}>
+        <LinearGradient
+          colors={["#6366F1", "#8B5CF6"]}
+          style={styles.orbGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
+      </View>
+      <View style={styles.orb2}>
+        <LinearGradient
+          colors={["#D946EF", "#F0ABFC"]}
+          style={styles.orbGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        />
+      </View>
 
       <View style={styles.content}>
         <Animated.View
@@ -191,40 +202,39 @@ export default function OnboardingScreen() {
               opacity: fadeAnim,
               transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
             },
-          ]}>
-          <View
-            style={[styles.iconWrapper, { backgroundColor: isDarkMode ? '#3B82F6' : '#FFFFFF' }]}>
-            <Image
-              className="mt-3"
-              source={require('../assets/images/Eagle-Logo.png')}
-              style={{ width: 110, height: 110 }}
-            />
-          </View>
+          ]}
+        >
+          <LinearGradient
+            colors={["#6366F1", "#8B5CF6", "#D946EF"]}
+            style={styles.iconWrapper}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <Image source={require("../assets/images/Eagle-Logo.png")} style={{ width: 110, height: 110 }} />
+          </LinearGradient>
 
           <Animated.Text
             style={[
               styles.appName,
-              { color: isDarkMode ? '#FFFFFF' : '#1F2937' },
+              { color: isDarkMode ? "#FFFFFF" : "#0F172A" },
               { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
-            ]}>
+            ]}
+          >
             Eagle Notifier
           </Animated.Text>
 
           <Animated.Text
             style={[
               styles.tagline,
-              { color: isDarkMode ? '#D1D5DB' : '#4B5563' },
+              { color: isDarkMode ? "#CBD5E1" : "#64748B" },
               { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
-            ]}>
+            ]}
+          >
             Industrial Alarm Monitoring Made Simple
           </Animated.Text>
         </Animated.View>
 
-        <Animated.View
-          style={[
-            styles.featureContainer,
-            { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
-          ]}>
+        <Animated.View style={[styles.featureContainer, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           <FeatureItem
             icon="checkmark-circle-outline"
             title="Real-time Alerts"
@@ -248,33 +258,51 @@ export default function OnboardingScreen() {
 
       <View style={styles.footer}>
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: isDarkMode ? '#3B82F6' : '#2563EB' }]}
+          style={styles.button}
           onPress={requestNotificationPermission}
           activeOpacity={0.8}
-          disabled={isLoading}>
-          {isLoading ? (
-            <ActivityIndicator size="small" color="#FFFFFF" />
-          ) : (
-            <>
-              <Text style={styles.buttonText}>Get Started</Text>
-              <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
-            </>
-          )}
+          disabled={isLoading}
+        >
+          <LinearGradient
+            colors={["#6366F1", "#8B5CF6", "#D946EF"]}
+            style={styles.buttonGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          >
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <>
+                <Text style={styles.buttonText}>Get Started</Text>
+                <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
+              </>
+            )}
+          </LinearGradient>
         </TouchableOpacity>
 
-        {/* Add update check button */}
         <TouchableOpacity
-          style={[styles.updateButton, { backgroundColor: isDarkMode ? '#374151' : '#E5E7EB' }]}
+          style={[
+            styles.updateButton,
+            {
+              backgroundColor: isDarkMode ? "rgba(51, 65, 85, 0.8)" : "rgba(241, 245, 249, 0.9)",
+              borderColor: isDarkMode ? "#475569" : "#E2E8F0",
+            },
+          ]}
           onPress={checkForUpdates}
-          activeOpacity={0.8}>
-          <Text style={[styles.updateButtonText, { color: isDarkMode ? '#F3F4F6' : '#1F2937' }]}>
+          activeOpacity={0.8}
+        >
+          <Ionicons
+            name="cloud-download-outline"
+            size={18}
+            color={isDarkMode ? "#94A3B8" : "#64748B"}
+            style={{ marginRight: 8 }}
+          />
+          <Text style={[styles.updateButtonText, { color: isDarkMode ? "#E2E8F0" : "#1F2937" }]}>
             Check for Updates
           </Text>
         </TouchableOpacity>
 
-        <Text style={[styles.poweredBy, { color: isDarkMode ? '#9CA3AF' : '#6B7280' }]}>
-          Powered by Tecosoft.ai
-        </Text>
+        <Text style={[styles.poweredBy, { color: isDarkMode ? "#64748B" : "#94A3B8" }]}>Powered by Tecosoft.ai</Text>
       </View>
 
       <UpdateModal
@@ -284,29 +312,29 @@ export default function OnboardingScreen() {
         onCancel={() => setUpdateModalVisible(false)}
       />
     </View>
-  );
+  )
 }
 
-// Feature item component
 function FeatureItem({ icon, title, description, isDarkMode }: FeatureItemProps) {
   return (
     <View style={styles.featureItem}>
-      <View style={[styles.featureIcon, { backgroundColor: isDarkMode ? '#374151' : '#E5E7EB' }]}>
-        <Ionicons name={icon} size={24} color={isDarkMode ? '#60A5FA' : '#2563EB'} />
-      </View>
+      <LinearGradient
+        colors={isDarkMode ? ["#334155", "#475569"] : ["#F1F5F9", "#E2E8F0"]}
+        style={styles.featureIcon}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <Ionicons name={icon} size={24} color={isDarkMode ? "#60A5FA" : "#6366F1"} />
+      </LinearGradient>
       <View style={styles.featureText}>
-        <Text style={[styles.featureTitle, { color: isDarkMode ? '#FFFFFF' : '#1F2937' }]}>
-          {title}
-        </Text>
-        <Text style={[styles.featureDescription, { color: isDarkMode ? '#9CA3AF' : '#6B7280' }]}>
-          {description}
-        </Text>
+        <Text style={[styles.featureTitle, { color: isDarkMode ? "#FFFFFF" : "#0F172A" }]}>{title}</Text>
+        <Text style={[styles.featureDescription, { color: isDarkMode ? "#94A3B8" : "#64748B" }]}>{description}</Text>
       </View>
     </View>
-  );
+  )
 }
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window")
 
 const styles = StyleSheet.create({
   container: {
@@ -314,104 +342,150 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 24,
   },
   logoContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 48,
   },
   iconWrapper: {
     width: 130,
     height: 130,
-    borderRadius: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: 65,
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 24,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
+    elevation: 12,
+    shadowColor: "#6366F1",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
   },
   appName: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: "800",
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: "center",
+    letterSpacing: 0.5,
   },
   tagline: {
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
     maxWidth: width * 0.8,
+    lineHeight: 24,
   },
   featureContainer: {
-    width: '100%',
+    width: "100%",
     marginTop: 24,
+    gap: 16,
   },
   featureItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
   },
   featureIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 16,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   featureText: {
     flex: 1,
   },
   featureTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 4,
   },
   featureDescription: {
     fontSize: 14,
+    lineHeight: 20,
   },
   footer: {
-    width: '100%',
+    width: "100%",
     paddingHorizontal: 24,
     paddingBottom: 24,
-    alignItems: 'center',
+    alignItems: "center",
+    gap: 12,
   },
   button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
+    width: "100%",
+    borderRadius: 16,
+    overflow: "hidden",
+    elevation: 8,
+    shadowColor: "#6366F1",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+  },
+  buttonGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 16,
     paddingHorizontal: 24,
-    borderRadius: 12,
-    marginBottom: 16,
+    gap: 8,
   },
   buttonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: '600',
-    marginRight: 8,
+    fontWeight: "600",
   },
   poweredBy: {
-    fontSize: 14,
+    fontSize: 13,
     marginTop: 8,
+    fontWeight: "500",
   },
   updateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 12,
-    marginBottom: 16,
+    borderWidth: 1,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
   updateButtonText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: "500",
   },
-}); 
+  orb1: {
+    position: "absolute",
+    top: -100,
+    right: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    opacity: 0.15,
+  },
+  orb2: {
+    position: "absolute",
+    bottom: -150,
+    left: -100,
+    width: 350,
+    height: 350,
+    borderRadius: 175,
+    opacity: 0.12,
+  },
+  orbGradient: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 9999,
+  },
+})

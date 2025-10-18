@@ -1,7 +1,7 @@
-# Eagle Notifier
+# Avy I
 
 <div align="center">
-  <img src="./assets/images/Eagle-Logo.png" alt="Eagle Notifier Logo" width="200" />
+  <img src="./assets/images/Eagle-Logo.png" alt="Avy I Logo" width="200" />
   <h3>Industrial Alarm Monitoring Made Simple</h3>
   <p>Real-time monitoring, instant notifications, and comprehensive alarm management for industrial SCADA systems</p>
 </div>
@@ -28,7 +28,7 @@
 
 ## Overview
 
-Eagle Notifier is a comprehensive industrial alarm monitoring and notification system designed specifically for industrial environments with SCADA (Supervisory Control and Data Acquisition) systems. It bridges the gap between traditional industrial control systems and modern mobile technology, enabling operators and administrators to receive critical alerts, monitor system parameters, and manage alarms from anywhere.
+Avy I is a comprehensive industrial alarm monitoring and notification system designed specifically for industrial environments with SCADA (Supervisory Control and Data Acquisition) systems. It bridges the gap between traditional industrial control systems and modern mobile technology, enabling operators and administrators to receive critical alerts, monitor system parameters, and manage alarms from anywhere.
 
 The system continuously monitors industrial equipment parameters (temperatures, levels, pressures, equipment statuses) by connecting directly to SCADA databases. It processes this data in real-time to detect anomalies, trigger alarms, and send push notifications to responsible personnel based on configurable thresholds and business rules.
 
@@ -48,7 +48,7 @@ The system continuously monitors industrial equipment parameters (temperatures, 
 
 ## Business Value
 
-Eagle Notifier delivers significant value to industrial operations by:
+Avy I delivers significant value to industrial operations by:
 
 - **Reducing Downtime**: Immediate notification of critical issues leads to faster response times
 - **Preventing Equipment Damage**: Early warning of abnormal conditions helps prevent catastrophic failures
@@ -86,7 +86,7 @@ Eagle Notifier delivers significant value to industrial operations by:
 
 ## System Architecture
 
-Eagle Notifier follows a modern client-server architecture optimized for reliability and real-time data processing.
+Avy I follows a modern client-server architecture optimized for reliability and real-time data processing.
 
 ### High-Level Architecture Diagram
 
@@ -244,7 +244,7 @@ flowchart TD
 
 ## Data Flow
 
-The following diagram illustrates how data flows through the Eagle Notifier system:
+The following diagram illustrates how data flows through the Avy I system:
 
 ```mermaid
 sequenceDiagram
@@ -812,7 +812,7 @@ npx expo start --web
 
 ## SCADA Integration
 
-Eagle Notifier connects directly to SCADA systems through a PostgreSQL database connection. The system polls the SCADA database at configurable intervals (default: 2 minutes) and processes the data to generate alarms.
+Avy I connects directly to SCADA systems through a PostgreSQL database connection. The system polls the SCADA database at configurable intervals (default: 2 minutes) and processes the data to generate alarms.
 
 ### SCADA Data Structure
 

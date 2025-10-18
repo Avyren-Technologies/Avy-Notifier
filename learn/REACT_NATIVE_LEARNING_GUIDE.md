@@ -1309,7 +1309,7 @@ observer.observe({ entryTypes: ['measure'] });
 ```javascript
 export default {
   expo: {
-    name: "Eagle Notifier",
+    name: "Avy I",
     slug: "eagle-notifier",
     version: "1.2.6",
     extra: {

@@ -651,8 +651,8 @@ export default function MeterReadingsHistoryScreen() {
         <FlashList
           data={sortedReadings}
           renderItem={renderMeterReadingItem}
-          estimatedItemSize={220}
-          keyExtractor={(item) => item.meter_id}
+          {...({ estimatedItemSize: 220 } as any)}
+          keyExtractor={(item: MeterReading) => item.meter_id}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.5}
           ListFooterComponent={renderFooter}

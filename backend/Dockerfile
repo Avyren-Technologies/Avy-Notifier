@@ -28,7 +28,13 @@ COPY --from=builder /app/src/generated/prisma-client ./dist/src/generated/prisma
 
 # 5. Runtime settings
 ENV NODE_ENV=production
+ENV PORT=8080
 EXPOSE 8080
 
-# 6. Start the server
+# 6. Create non-root user for security
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
+USER nodejs
+
+# 7. Start the server
 CMD ["node", "dist/server.js"]
