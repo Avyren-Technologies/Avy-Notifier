@@ -1,6 +1,6 @@
 # Gemini Code Assistant Configuration - Frontend
 
-This file provides context to the Gemini code assistant for the Eagle-Notifier frontend application.
+This file provides context to the Gemini code assistant for the Avy-I frontend application.
 
 ## Frontend Technology Stack
 

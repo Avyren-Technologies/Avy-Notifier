@@ -1,5 +1,5 @@
 # 🚀 React Native with Expo & NativeWind Learning Guide
-## Using Eagle-Notifier Project as Examples
+## Using Avy-I Project as Examples
 
 ---
 
@@ -18,7 +18,7 @@ React Native is a framework that lets you build mobile apps using JavaScript/Typ
 ### **1.2 Project Structure Overview**
 
 ```
-Eagle-Notifier/
+Avy-I/
 ├── app/                    # Main app code (Expo Router)
 │   ├── _layout.tsx        # Root layout with providers
 │   ├── (auth)/            # Authentication routes
@@ -370,9 +370,9 @@ The authentication system in this project follows this flow:
 **Using Expo SecureStore:**
 ```typescript
 // Token storage keys
-const AUTH_TOKEN_KEY = 'eagle_auth_token';
-const REFRESH_TOKEN_KEY = 'eagle_refresh_token';
-const USER_KEY = 'eagle_user';
+const AUTH_TOKEN_KEY = 'avy_auth_token';
+const REFRESH_TOKEN_KEY = 'avy_refresh_token';
+const USER_KEY = 'avy_user';
 
 // Save tokens
 await Promise.all([
@@ -1310,7 +1310,7 @@ observer.observe({ entryTypes: ['measure'] });
 export default {
   expo: {
     name: "Avy I",
-    slug: "eagle-notifier",
+    slug: "Avy-I",
     version: "1.2.6",
     extra: {
       apiUrl: process.env.API_URL || "https://api.eaglenotifier.com",
@@ -1363,7 +1363,7 @@ export default {
 
 ## 🎯 **Conclusion**
 
-This guide has covered the fundamental concepts of React Native development with Expo and NativeWind using the Eagle-Notifier project as practical examples. 
+This guide has covered the fundamental concepts of React Native development with Expo and NativeWind using the Avy-I project as practical examples. 
 
 **Key Takeaways:**
 - React Native with Expo provides a powerful platform for cross-platform mobile development
@@ -1380,6 +1380,6 @@ This guide has covered the fundamental concepts of React Native development with
 4. Explore advanced React Native features
 5. Contribute to open source projects
 
-Remember, the best way to learn is by building real applications and experimenting with different approaches. The Eagle-Notifier project provides excellent examples of production-ready React Native code that you can study and learn from.
+Remember, the best way to learn is by building real applications and experimenting with different approaches. The Avy-I project provides excellent examples of production-ready React Native code that you can study and learn from.
 
 Happy coding! 🚀 

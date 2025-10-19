@@ -122,7 +122,7 @@ export default function Onboarding() {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
-            <Image source={require("../assets/images/Eagle-Logo.png")} style={styles.logo} resizeMode="contain" />
+            <Image source={require("../assets/images/Avy-Logo.png")} style={styles.logo} resizeMode="contain" />
           </LinearGradient>
 
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>

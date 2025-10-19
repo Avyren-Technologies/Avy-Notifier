@@ -49,7 +49,7 @@ export function useReportGenerator(): ReportGeneratorReturnType {
       // Build a random filename with timestamp
       const timestamp = new Date().toISOString().replace(/[:.-]/g, '_');
       const randomSuffix = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-      const title = options.title || 'Eagle_Notifier_Report';
+      const title = options.title || 'Avy_Notifier_Report';
       const sanitizedTitle = title.replace(/\s+/g, '_');
       
       let filePath = '';

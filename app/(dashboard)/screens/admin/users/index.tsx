@@ -92,7 +92,7 @@ interface UserFormData {
   role: UserRole;
 }
 
-const AUTH_TOKEN_KEY = 'eagle_auth_token';
+const AUTH_TOKEN_KEY = 'avy_auth_token';
 
 export default function UserManagementScreen() {
   const { isDarkMode } = useTheme();

@@ -11,7 +11,7 @@ console.log('Environment variables check:', {
 
 export const apiConfig = {
   // Base URL for API calls - use production URL as fallback instead of local IP
-  apiUrl: process.env.EXPO_PUBLIC_API_URL || 'https://eagle-notifier-server-eyckc9gmbvf7bqgq.centralindia-01.azurewebsites.net',
+  apiUrl: process.env.EXPO_PUBLIC_API_URL || 'https://Avy-I-server-eyckc9gmbvf7bqgq.centralindia-01.azurewebsites.net',
   
   // Default request timeout in milliseconds
   timeout: 15000,

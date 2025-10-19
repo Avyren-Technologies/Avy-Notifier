@@ -472,12 +472,12 @@ export const useAlarms = (): UseAlarmsReturn => {
 
 ## 🚀 **Next Steps**
 
-1. **Study the Eagle-Notifier codebase** - It's a great example of production-ready React Native code
+1. **Study the Avy-I codebase** - It's a great example of production-ready React Native code
 2. **Build small features** - Start with simple components and gradually add complexity
 3. **Experiment with different patterns** - Try different state management approaches
 4. **Learn about testing** - Add unit and integration tests
 5. **Explore advanced features** - Push notifications, offline support, etc.
 
-The Eagle-Notifier project demonstrates all these concepts in a real-world application. Use it as a reference and learning resource!
+The Avy-I project demonstrates all these concepts in a real-world application. Use it as a reference and learning resource!
 
 Happy coding! 🚀 

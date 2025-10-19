@@ -18,9 +18,9 @@ The authentication system in this project follows this flow:
 **Using Expo SecureStore:**
 ```typescript
 // Token storage keys
-const AUTH_TOKEN_KEY = 'eagle_auth_token';
-const REFRESH_TOKEN_KEY = 'eagle_refresh_token';
-const USER_KEY = 'eagle_user';
+const AUTH_TOKEN_KEY = 'avy_auth_token';
+const REFRESH_TOKEN_KEY = 'avy_refresh_token';
+const USER_KEY = 'avy_user';
 
 // Save tokens
 await Promise.all([
@@ -753,7 +753,7 @@ const login = async (credentials: LoginCredentials) => {
 
 ## 🎯 **Conclusion**
 
-This guide has covered the advanced concepts of React Native development with Expo and NativeWind using the Eagle-Notifier project as practical examples.
+This guide has covered the advanced concepts of React Native development with Expo and NativeWind using the Avy-I project as practical examples.
 
 **Key Takeaways:**
 - Authentication systems require careful token management and refresh logic
@@ -770,6 +770,6 @@ This guide has covered the advanced concepts of React Native development with Ex
 4. Explore advanced React Native features
 5. Contribute to open source projects
 
-The Eagle-Notifier project demonstrates production-ready patterns that you can apply to your own applications. Study the code, experiment with it, and build your own features to solidify your understanding!
+The Avy-I project demonstrates production-ready patterns that you can apply to your own applications. Study the code, experiment with it, and build your own features to solidify your understanding!
 
 Happy coding! 🚀 

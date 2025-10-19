@@ -2,7 +2,7 @@
 
 ## Root Level Organization
 ```
-Eagle-Notifier/
+Avy-I/
 ├── app/                    # React Native mobile application
 ├── backend/                # Node.js Express server
 ├── assets/                 # Static assets (images, fonts, sounds)

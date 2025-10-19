@@ -15,7 +15,7 @@ React Native is a framework that lets you build mobile apps using JavaScript/Typ
 ### **1.2 Project Structure Overview**
 
 ```
-Eagle-Notifier/
+Avy-I/
 ├── app/                    # Main app code (Expo Router)
 │   ├── _layout.tsx        # Root layout with providers
 │   ├── (auth)/            # Authentication routes
@@ -427,6 +427,6 @@ This covers the basic concepts of React Native with Expo and NativeWind. In the 
 4. **State Management**: Zustand for complex state
 5. **Performance Optimization**: Best practices for mobile apps
 
-The Eagle-Notifier project provides excellent examples of all these concepts in action. Study the code, experiment with it, and build your own features to solidify your understanding!
+The Avy-I project provides excellent examples of all these concepts in action. Study the code, experiment with it, and build your own features to solidify your understanding!
 
 Happy coding! 🚀 

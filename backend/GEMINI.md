@@ -1,6 +1,6 @@
 # Gemini Code Assistant Configuration - Backend
 
-This file provides context to the Gemini code assistant for the Eagle-Notifier backend application.
+This file provides context to the Gemini code assistant for the Avy-I backend application.
 
 ## Backend Technology Stack
 

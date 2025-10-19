@@ -1,6 +1,6 @@
 {
   "cesVersion": "2.18.1",
-  "projectName": "eagle-notifier",
+  "projectName": "avy-i",
   "packages": [
     {
       "name": "nativewind",

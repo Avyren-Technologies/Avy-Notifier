@@ -1,6 +1,6 @@
 
 ```
-Eagle-Notifier
+Avy-I
 ├─ .easignore
 ├─ app
 │  ├─ (auth)
@@ -96,7 +96,7 @@ Eagle-Notifier
 │  │  └─ SpaceMono-Regular.ttf
 │  ├─ images
 │  │  ├─ adaptive-icon.png
-│  │  ├─ Eagle-Logo.png
+│  │  ├─ Avy-Logo.png
 │  │  ├─ favicon.png
 │  │  ├─ icon.png
 │  │  ├─ notification-icon.png

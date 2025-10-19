@@ -1,10 +1,10 @@
 # Gemini Code Assistant Configuration
 
-This file provides context to the Gemini code assistant for the Eagle-Notifier project.
+This file provides context to the Gemini code assistant for the Avy-I project.
 
 ## Project Overview
 
-Eagle-Notifier is a full-stack application designed for monitoring and sending notifications. It consists of a React Native (Expo) mobile frontend and a Node.js (Express) backend.
+Avy-I is a full-stack application designed for monitoring and sending notifications. It consists of a React Native (Expo) mobile frontend and a Node.js (Express) backend.
 
 ## High-Level Architecture
 

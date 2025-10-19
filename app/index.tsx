@@ -210,7 +210,7 @@ export default function OnboardingScreen() {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
-            <Image source={require("../assets/images/Eagle-Logo.png")} style={{ width: 110, height: 110 }} />
+            <Image source={require("../assets/images/Avy-Logo.png")} style={{ width: 110, height: 110 }} />
           </LinearGradient>
 
           <Animated.View

@@ -1,12 +1,12 @@
 # Avy I
 
 <div align="center">
-  <img src="./assets/images/Eagle-Logo.png" alt="Avy I Logo" width="200" />
+  <img src="./assets/images/Avy-Logo.png" alt="Avy I Logo" width="200" />
   <h3>Industrial Alarm Monitoring Made Simple</h3>
   <p>Real-time monitoring, instant notifications, and comprehensive alarm management for industrial SCADA systems</p>
 </div>
 
-[![CI/CD for Eagle-Notifier IIS Deployment](https://github.com/CHIRANJEEVICHETAN/Eagle-Notifier/actions/workflows/main_eagle-notifier.yml/badge.svg?branch=main&event=workflow_run)](https://github.com/CHIRANJEEVICHETAN/Eagle-Notifier/actions/workflows/main_eagle-notifier.yml)
+[![CI/CD for Avy-I IIS Deployment](https://github.com/CHIRANJEEVICHETAN/Avy-I/actions/workflows/main_Avy-I.yml/badge.svg?branch=main&event=workflow_run)](https://github.com/CHIRANJEEVICHETAN/Avy-I/actions/workflows/main_Avy-I.yml)
 
 ## Table of Contents
 - [Overview](#overview)
@@ -751,8 +751,8 @@ flowchart TD
 
 1. **Clone the repository:**
 ```bash
-git clone https://github.com/loginwaresofttech/eagle-notifier.git
-cd eagle-notifier
+git clone https://github.com/loginwaresofttech/Avy-I.git
+cd Avy-I
 ```
 
 2. **Install dependencies:**
@@ -1107,8 +1107,8 @@ The backend can be containerized and deployed using Docker:
 
 ```bash
 cd backend
-docker build -t eagle-notifier-app:latest .
-docker run -p 8080:8080 --env-file .env eagle-notifier-app:latest
+docker build -t Avy-I-app:latest .
+docker run -p 8080:8080 --env-file .env Avy-I-app:latest
 ```
 
 ### Azure Deployment
@@ -1183,4 +1183,4 @@ For support or questions, please contact support@Avyren Technologies
 
 ---
 
-**Eagle-Notifier** transforms industrial monitoring from reactive to proactive, ensuring your operations run smoothly with real-time visibility and instant alerts. Our multi-tenant architecture scales with your business, while our AI-powered configuration system makes setup simple and intelligent.
+**Avy-I** transforms industrial monitoring from reactive to proactive, ensuring your operations run smoothly with real-time visibility and instant alerts. Our multi-tenant architecture scales with your business, while our AI-powered configuration system makes setup simple and intelligent.

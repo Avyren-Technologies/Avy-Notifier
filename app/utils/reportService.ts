@@ -83,7 +83,7 @@ export const reportService = {
       
       // Generate filename
       const timestamp = formatDate(new Date(), 'yyyyMMdd-HHmmss');
-      const fileName = `eagle-report-${timestamp}.${reportFormat === 'pdf' ? 'pdf' : 'xlsx'}`;
+      const fileName = `avy-report-${timestamp}.${reportFormat === 'pdf' ? 'pdf' : 'xlsx'}`;
       const filePath = `${DOWNLOADS_DIRECTORY}${fileName}`;
       
       // Generate the appropriate report format
@@ -113,7 +113,7 @@ export const reportService = {
   ): Promise<string> => {
     try {
       // Generate HTML content
-      const html = generateReportHtml(reportData, timeRange, 'Eagle Alarm Report');
+      const html = generateReportHtml(reportData, timeRange, 'Avy Alarm Report');
       
       // Generate PDF from HTML
       const { uri } = await Print.printToFileAsync({

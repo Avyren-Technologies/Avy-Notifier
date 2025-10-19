@@ -8,7 +8,7 @@ import { ReportTimeRange } from '../components/ReportGenerator';
 export function generateReportHtml(
   reportData: ReportData,
   timeRange: ReportTimeRange,
-  title: string = 'Eagle Alarm Report'
+  title: string = 'Avy Alarm Report'
 ): string {
   const { alarms, analytics, timeSeriesData } = reportData;
   

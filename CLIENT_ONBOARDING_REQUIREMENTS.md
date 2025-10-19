@@ -1,8 +1,8 @@
-# Eagle-Notifier: Client Onboarding Requirements & Project Overview
+# Avy-I: Client Onboarding Requirements & Project Overview
 
 ## 📋 Project Overview
 
-**Eagle-Notifier** is a comprehensive industrial alarm monitoring and notification system designed specifically for industrial environments with SCADA (Supervisory Control and Data Acquisition) systems. It bridges the gap between traditional industrial control systems and modern mobile technology, enabling operators and administrators to receive critical alerts, monitor system parameters, and manage alarms from anywhere.
+**Avy-I** is a comprehensive industrial alarm monitoring and notification system designed specifically for industrial environments with SCADA (Supervisory Control and Data Acquisition) systems. It bridges the gap between traditional industrial control systems and modern mobile technology, enabling operators and administrators to receive critical alerts, monitor system parameters, and manage alarms from anywhere.
 
 ### 🎯 Core Value Proposition
 
@@ -270,12 +270,12 @@
 4. **User Requirements**: Detailed user role and access requirements
 
 ### **Contact Information**
-- **Sales Team**: sales@eagle-notifier.com
-- **Technical Support**: support@eagle-notifier.com
+- **Sales Team**: sales@Avy-I.com
+- **Technical Support**: support@Avy-I.com
 - **Emergency Contact**: +1-XXX-XXX-XXXX (24/7)
 
 ---
 
-**Eagle-Notifier** transforms industrial monitoring from reactive to proactive, ensuring your operations run smoothly with real-time visibility and instant alerts. Our multi-tenant architecture scales with your business, while our AI-powered configuration system makes setup simple and intelligent.
+**Avy-I** transforms industrial monitoring from reactive to proactive, ensuring your operations run smoothly with real-time visibility and instant alerts. Our multi-tenant architecture scales with your business, while our AI-powered configuration system makes setup simple and intelligent.
 
-*Ready to revolutionize your industrial monitoring? Let's discuss how Eagle-Notifier can enhance your operations.*
+*Ready to revolutionize your industrial monitoring? Let's discuss how Avy-I can enhance your operations.*

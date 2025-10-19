@@ -1,5 +1,5 @@
 {
-  "name": "eagle-notifier-backend",
+  "name": "avy-i-backend",
   "version": "1.0.0",
   "description": "Avy I Backend",
   "main": "server.ts",

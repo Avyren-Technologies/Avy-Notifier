@@ -8,9 +8,9 @@ import { apiConfig, PROJECT_ID } from '../api/config';
 import { useQueryClient } from '@tanstack/react-query';
 
 // Token storage keys
-const AUTH_TOKEN_KEY = 'eagle_auth_token';
-const REFRESH_TOKEN_KEY = 'eagle_refresh_token';
-const USER_KEY = 'eagle_user';
+const AUTH_TOKEN_KEY = 'avy_auth_token';
+const REFRESH_TOKEN_KEY = 'avy_refresh_token';
+const USER_KEY = 'avy_user';
 const ONBOARDING_KEY = 'hasSeenOnboarding';
 const SELECTED_APP_KEY = 'selected_app_type';
 

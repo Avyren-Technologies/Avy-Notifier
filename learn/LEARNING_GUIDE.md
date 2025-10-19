@@ -4,7 +4,7 @@
 
 ### **1.1 Project Structure**
 ```
-Eagle-Notifier/
+Avy-I/
 ├── app/                    # Main app code (Expo Router)
 │   ├── _layout.tsx        # Root layout with providers
 │   ├── (auth)/            # Authentication routes
@@ -731,7 +731,7 @@ const login = async (credentials: LoginCredentials) => {
 
 ## 🎯 **Conclusion**
 
-This guide has covered the fundamental concepts of React Native development with Expo and NativeWind using the Eagle-Notifier project as practical examples.
+This guide has covered the fundamental concepts of React Native development with Expo and NativeWind using the Avy-I project as practical examples.
 
 **Key Takeaways:**
 - React Native with Expo provides a powerful platform for cross-platform mobile development
@@ -748,6 +748,6 @@ This guide has covered the fundamental concepts of React Native development with
 4. Explore advanced React Native features
 5. Contribute to open source projects
 
-Remember, the best way to learn is by building real applications and experimenting with different approaches. The Eagle-Notifier project provides excellent examples of production-ready React Native code that you can study and learn from.
+Remember, the best way to learn is by building real applications and experimenting with different approaches. The Avy-I project provides excellent examples of production-ready React Native code that you can study and learn from.
 
 Happy coding! 🚀 
