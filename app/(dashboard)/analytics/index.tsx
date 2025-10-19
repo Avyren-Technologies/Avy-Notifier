@@ -23,7 +23,7 @@ import { useAnalyticsData } from '../../hooks/useAlarms';
 import { formatTimestampIST } from '../../utils/timezoneUtils';
 import { useQueryClient } from '@tanstack/react-query';
 import { LinearGradient } from 'expo-linear-gradient';
-import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../constants/theme';
+import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../appconstants/theme';
 
 // Types
 type GraphType = 'analog' | 'binary';

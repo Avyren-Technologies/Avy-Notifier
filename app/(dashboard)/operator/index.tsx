@@ -34,7 +34,7 @@ import { SetpointConfigModal } from '../../components/SetpointConfigModal';
 import { useMaintenance } from '../../context/MaintenanceContext';
 import { useUnreadCount } from '../../hooks/useNotifications';
 import { LinearGradient } from 'expo-linear-gradient';
-import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../constants/theme';
+import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../appconstants/theme';
 import * as SecureStore from 'expo-secure-store';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;

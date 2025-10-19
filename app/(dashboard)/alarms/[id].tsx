@@ -25,7 +25,7 @@ import { Alarm } from '../../types/alarm';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { formatFullDateTimeIST, formatTimestampWithSecondsIST } from '../../utils/timezoneUtils';
 import { LinearGradient } from 'expo-linear-gradient';
-import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../constants/theme';
+import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../appconstants/theme';
 
 // Filter types for alarm history
 type AlarmFilter = 'active' | 'acknowledged' | 'resolved' | 'all';

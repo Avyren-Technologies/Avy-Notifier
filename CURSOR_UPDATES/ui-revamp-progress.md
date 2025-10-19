@@ -6,7 +6,7 @@ Complete UI overhaul to create a modern, vibrant, and eye-catching interface whi
 ## Completed ✅
 
 ### 1. Theme System Created
-- **File**: `app/constants/theme.ts`
+- **File**: `app/appconstants/theme.ts`
 - **Changes**:
   - New modern color palette with vibrant gradients
   - Primary: Indigo/Purple gradient (#6366F1 → #8B5CF6 → #D946EF)

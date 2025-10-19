@@ -31,7 +31,7 @@ import { BlurView } from 'expo-blur';
 import { useMaintenance } from '../../context/MaintenanceContext';
 import { APP_VERSION } from '../../api/config';
 import { LinearGradient } from 'expo-linear-gradient';
-import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../constants/theme';
+import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../appconstants/theme';
 
 // Types for profile API responses
 interface ProfileResponse {

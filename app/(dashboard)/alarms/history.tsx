@@ -21,7 +21,7 @@ import { AlarmDetails } from '../../components/AlarmDetails';
 import { useAlarmHistory, useAlarmConfigurations } from '../../hooks/useAlarms';
 import { Alarm } from '../../types/alarm';
 import { LinearGradient } from 'expo-linear-gradient';
-import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../constants/theme';
+import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../appconstants/theme';
 
 // Helper function to correctly format timestamps to show IST time consistently in 12-hour format
 const formatTimestamp = (timestamp: string): string => {

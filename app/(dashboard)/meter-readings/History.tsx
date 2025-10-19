@@ -28,7 +28,7 @@ import {
   formatFullTimestampIST 
 } from '../../utils/timezoneUtils';
 import { LinearGradient } from 'expo-linear-gradient';
-import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../constants/theme';
+import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../appconstants/theme';
 
 /**
  * MeterReadingsHistoryScreen

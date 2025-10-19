@@ -15,7 +15,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import { LinearGradient } from 'expo-linear-gradient';
-// import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../constants/theme';
+// import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../appconstants/theme';
 
 export default function ReportsScreen() {
   const { isDarkMode } = useTheme();
