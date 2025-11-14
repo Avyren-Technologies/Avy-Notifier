@@ -19,6 +19,8 @@ backend/src/generated/prisma-client
 
 constants/
 
+.yarn/
+
 .env
 
 backend/web.config
