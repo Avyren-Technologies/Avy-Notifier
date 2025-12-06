@@ -263,58 +263,59 @@ const MONITORING_INTERVAL = parseInt(
   process.env.EXPO_PUBLIC_SCADA_INTERVAL || '30000'
 ); // Default 30 seconds
 
-// Initialize databases and start server
-async function startServer() {
-  try {
-    // Test database connections with timeout and retry logic
+// Start server immediately, load DB in background
+function startServer() {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+
+    // Log all available routes
+    console.log('📋 Available routes:');
+    console.log('/api/auth routes (authentication)');
+    console.log('/api/alarms routes (alarm management)');
+    console.log('/api/admin routes (administrative functions)');
+    console.log('/api/operator routes (operator functions)');
+    console.log('/api/notifications routes (notification management)');
+    console.log('/api/scada routes (SCADA data access)');
+    console.log('/api/maintenance routes (maintenance operations)');
+    console.log('/api/reports routes (reporting functions)');
+    console.log('/api/meter routes (meter readings)');
+
+    console.log(`⏱️ Background monitoring interval: ${MONITORING_INTERVAL}ms`);
+    console.log('✅ Server initialization complete');
+  });
+
+  // Load databases and start background services asynchronously
+  (async () => {
     try {
-      await Promise.race([
-        prisma.$connect(),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Prisma connection timeout')), 5000)
-        )
-      ]);
-      console.log('✅ Successfully connected to main database');
-    } catch (dbError) {
-      console.error('❌ Database connection error:', dbError);
-      console.log('🔄 Retrying database connection in 3 seconds...');
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      await prisma.$connect();
-      console.log('✅ Database connection retry successful');
+      // Test database connections with timeout and retry logic
+      try {
+        await Promise.race([
+          prisma.$connect(),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Prisma connection timeout')), 5000)
+          )
+        ]);
+        console.log('✅ Successfully connected to main database');
+      } catch (dbError) {
+        console.error('❌ Database connection error:', dbError);
+        console.log('🔄 Retrying database connection in 3 seconds...');
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        await prisma.$connect();
+        console.log('✅ Database connection retry successful');
+      }
+
+      // Test all org SCADA DB connections and log results
+      console.log('🔍 Testing SCADA database connections for all organizations...');
+      await testAllOrgScadaConnections();
+
+      // Start the background monitoring service
+      console.log('🚀 Starting background monitoring service...');
+      await BackgroundMonitoringService.start();
+    } catch (error) {
+      console.error('❌ Async startup error:', error);
     }
-
-    // Test all org SCADA DB connections and log results
-    console.log('🔍 Testing SCADA database connections for all organizations...');
-    await testAllOrgScadaConnections();
-
-    // Start the background monitoring service
-    console.log('🚀 Starting background monitoring service...');
-    await BackgroundMonitoringService.start();
-
-    // Start server
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-      
-      // Log all available routes
-      console.log('📋 Available routes:');
-      console.log('/api/auth routes (authentication)');
-      console.log('/api/alarms routes (alarm management)');
-      console.log('/api/admin routes (administrative functions)');
-      console.log('/api/operator routes (operator functions)');
-      console.log('/api/notifications routes (notification management)');
-      console.log('/api/scada routes (SCADA data access)');
-      console.log('/api/maintenance routes (maintenance operations)');
-      console.log('/api/reports routes (reporting functions)');
-      console.log('/api/meter routes (meter readings)');
-
-      console.log(`⏱️ Background monitoring interval: ${MONITORING_INTERVAL}ms`);
-      console.log('✅ Server initialization complete');
-    });
-  } catch (error) {
-    console.error('❌ Failed to start server:', error);
-    process.exit(1);
-  }
+  })();
 }
 
 // Handle graceful shutdown
