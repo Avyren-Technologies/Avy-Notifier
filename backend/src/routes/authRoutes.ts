@@ -144,7 +144,7 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
     }
     
     const expiresIn = process.env.JWT_EXPIRES_IN || '1d';
-    const refreshExpiresIn = '7d'; // Refresh tokens last longer
+    const refreshExpiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d'; // Refresh tokens last longer
     
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role, organizationId: user.organizationId },
