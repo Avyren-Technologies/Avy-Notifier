@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import {
   View,
   Text,
@@ -37,6 +37,7 @@ import {
 } from '../../utils/timezoneUtils';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getTheme, Colors, Shadows, BorderRadius, Gradients } from '../../appconstants/theme';
+import { MeterSimulationControls } from '../../components/MeterSimulationControls';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -504,6 +505,7 @@ export default function MeterReadingsScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isAdmin = authState?.user?.role === 'ADMIN';
+
   
   // UI State
   const [refreshing, setRefreshing] = useState(false);
@@ -511,6 +513,7 @@ export default function MeterReadingsScreen() {
   const [graphView, setGraphView] = useState<'primary' | 'secondary'>('primary'); // New state for graph view
   const [limitModalVisible, setLimitModalVisible] = useState(false);
   const [selectedLimit, setSelectedLimit] = useState<MeterLimit | null>(null);
+  const [simulationModalVisible, setSimulationModalVisible] = useState(false);
   
   // Get unread notifications count
   const { data: unreadCount = 0, isLoading: isUnreadLoading, error: unreadError } = useUnreadCount();
@@ -964,6 +967,7 @@ export default function MeterReadingsScreen() {
               Theme
             </Text>
           </TouchableOpacity>
+
         </View>
       </View>
 
@@ -1448,6 +1452,27 @@ export default function MeterReadingsScreen() {
         </View>
       </SafeAreaView>
 
+      {/* Floating Action Button for Simulation (Admin Only) */}
+      {isAdmin && (
+        <TouchableOpacity
+          style={[
+            styles.floatingActionButton,
+            {
+              backgroundColor: isDarkMode ? '#10B981' : '#059669',
+              shadowColor: isDarkMode ? '#10B981' : '#059669',
+            },
+          ]}
+          onPress={() => setSimulationModalVisible(true)}
+          accessibilityLabel="Open Meter Simulation Controls"
+          accessibilityRole="button">
+          <Ionicons
+            name="play-circle-outline"
+            size={28}
+            color="#FFFFFF"
+          />
+        </TouchableOpacity>
+      )}
+
       {/* Parameter Limit Modal */}
       <Modal
         visible={limitModalVisible}
@@ -1605,6 +1630,12 @@ export default function MeterReadingsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Simulation Controls Modal */}
+      <MeterSimulationControls
+        visible={simulationModalVisible}
+        onClose={() => setSimulationModalVisible(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -2124,5 +2155,21 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '500',
+  },
+  // Floating Action Button Styles
+  floatingActionButton: {
+    position: 'absolute',
+    bottom: 100, // Above bottom navigation
+    right: 20,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 1000, // Ensure it floats above other content
   },
 });

@@ -5,6 +5,8 @@ import prisma from '../config/db';
 import { NotificationService } from '../services/notificationService';
 import { authenticate, authorize } from '../middleware/authMiddleware';
 import { getRequestOrgId } from '../middleware/authMiddleware';
+import MeterSimulationService from '../services/meterSimulationService';
+import { MeterMigrations } from '../utils/meterMigrations';
 import ExcelJS from 'exceljs';
 import { format as formatDate } from 'date-fns';
 
@@ -941,6 +943,243 @@ router.get('/reports/:id', authenticate, asyncHandler(async (req: Request, res: 
     return res.status(500).json({
       success: false,
       message: 'Error fetching meter report'
+    });
+  }
+}));
+
+/**
+ * @route   POST /api/meter/simulation/start
+ * @desc    Start meter data simulation
+ * @access  Private (Admin only)
+ */
+router.post('/simulation/start', authenticate, authorize(['ADMIN']), asyncHandler(async (req: Request, res: Response) => {
+  const organizationId = getRequestOrgId(req);
+  const {
+    interval = 30000,
+    realisticVariations = true,
+    notifyOnLimits = true,
+    baseValues,
+    variations
+  } = req.body;
+
+  try {
+    await MeterSimulationService.startSimulation(organizationId, {
+      interval,
+      realisticVariations,
+      notifyOnLimits,
+      baseValues,
+      variations
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Meter simulation started successfully',
+      data: {
+        organizationId,
+        interval,
+        realisticVariations,
+        notifyOnLimits
+      }
+    });
+  } catch (error) {
+    logError('Error starting simulation', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error starting meter simulation'
+    });
+  }
+}));
+
+/**
+ * @route   POST /api/meter/simulation/stop
+ * @desc    Stop meter data simulation
+ * @access  Private (Admin only)
+ */
+router.post('/simulation/stop', authenticate, authorize(['ADMIN']), asyncHandler(async (req: Request, res: Response) => {
+  const organizationId = getRequestOrgId(req);
+
+  try {
+    MeterSimulationService.stopSimulation(organizationId);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Meter simulation stopped successfully',
+      data: { organizationId }
+    });
+  } catch (error) {
+    logError('Error stopping simulation', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error stopping meter simulation'
+    });
+  }
+}));
+
+/**
+ * @route   PUT /api/meter/simulation/config
+ * @desc    Update simulation configuration
+ * @access  Private (Admin only)
+ */
+router.put('/simulation/config', authenticate, authorize(['ADMIN']), asyncHandler(async (req: Request, res: Response) => {
+  const organizationId = getRequestOrgId(req);
+  const updates = req.body;
+
+  try {
+    MeterSimulationService.updateConfig(organizationId, updates);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Simulation configuration updated successfully',
+      data: { organizationId, updates }
+    });
+  } catch (error) {
+    logError('Error updating simulation config', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error updating simulation configuration'
+    });
+  }
+}));
+
+/**
+ * @route   GET /api/meter/simulation/status
+ * @desc    Get simulation status
+ * @access  Private
+ */
+router.get('/simulation/status', authenticate, asyncHandler(async (req: Request, res: Response) => {
+  const organizationId = getRequestOrgId(req);
+
+  try {
+    const status = MeterSimulationService.getStatus(organizationId);
+
+    return res.status(200).json({
+      success: true,
+      data: status
+    });
+  } catch (error) {
+    logError('Error getting simulation status', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error getting simulation status'
+    });
+  }
+}));
+
+/**
+ * @route   GET /api/meter/simulation/all
+ * @desc    Get all running simulations (Super Admin only)
+ * @access  Private (Super Admin only)
+ */
+router.get('/simulation/all', authenticate, authorize(['SUPER_ADMIN']), asyncHandler(async (req: Request, res: Response) => {
+  try {
+    const simulations = MeterSimulationService.getAllSimulations();
+
+    return res.status(200).json({
+      success: true,
+      data: simulations
+    });
+  } catch (error) {
+    logError('Error getting all simulations', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error getting simulation data'
+    });
+  }
+}));
+
+/**
+ * @route   POST /api/meter/simulation/initialize
+ * @desc    Initialize sample data for demonstration
+ * @access  Private (Admin only)
+ */
+router.post('/simulation/initialize', authenticate, authorize(['ADMIN']), asyncHandler(async (req: Request, res: Response) => {
+  const organizationId = getRequestOrgId(req);
+
+  try {
+    await MeterSimulationService.initializeSampleData(organizationId);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Sample meter data initialized successfully',
+      data: { organizationId }
+    });
+  } catch (error) {
+    logError('Error initializing sample data', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error initializing sample meter data'
+    });
+  }
+}));
+
+/**
+ * @route   POST /api/meter/migrations/create-table
+ * @desc    Create the meter_readings table in SCADA database
+ * @access  Private (Admin only)
+ */
+router.post('/migrations/create-table', authenticate, authorize(['ADMIN']), asyncHandler(async (req: Request, res: Response) => {
+  const organizationId = getRequestOrgId(req);
+  try {
+    await MeterMigrations.createMeterReadingsTable(organizationId);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Meter readings table created successfully in SCADA database'
+    });
+  } catch (error) {
+    logError('Error creating meter readings table', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error creating meter readings table',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+}));
+
+/**
+ * @route   GET /api/meter/migrations/status
+ * @desc    Check if meter_readings table exists and get stats
+ * @access  Private
+ */
+router.get('/migrations/status', authenticate, asyncHandler(async (req: Request, res: Response) => {
+  const organizationId = getRequestOrgId(req);
+  try {
+    const stats = await MeterMigrations.getTableStats(organizationId);
+
+    return res.status(200).json({
+      success: true,
+      data: stats
+    });
+  } catch (error) {
+    logError('Error checking migration status', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error checking migration status',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+}));
+
+/**
+ * @route   DELETE /api/meter/migrations/drop-table
+ * @desc    Drop the meter_readings table (for testing/cleanup)
+ * @access  Private (Admin only)
+ */
+router.delete('/migrations/drop-table', authenticate, authorize(['ADMIN']), asyncHandler(async (req: Request, res: Response) => {
+  const organizationId = getRequestOrgId(req);
+  try {
+    await MeterMigrations.dropMeterReadingsTable(organizationId);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Meter readings table dropped successfully'
+    });
+  } catch (error) {
+    logError('Error dropping meter readings table', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error dropping meter readings table',
+      error: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 }));

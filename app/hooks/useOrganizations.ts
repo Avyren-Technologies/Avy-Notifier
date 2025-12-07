@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { apiConfig } from '../api/config';
+import { useAuth } from '../context/AuthContext';
 
 export interface Organization {
   id: string;
@@ -18,6 +19,11 @@ interface OrgForm {
 
 export function useOrganizations() {
   const queryClient = useQueryClient();
+  const { authState } = useAuth();
+
+  // Only enable this query for SUPER_ADMIN users who are authenticated
+  const enabled = authState.isAuthenticated &&
+                  authState.user?.role === 'SUPER_ADMIN';
 
   // Fetch all organizations
   const {
@@ -30,6 +36,7 @@ export function useOrganizations() {
       const { data } = await axios.get<Organization[]>(`${apiConfig.apiUrl}/api/admin/organizations`);
       return data;
     },
+    enabled, // Only run query when user is authenticated and is SUPER_ADMIN
   });
 
   // Create organization

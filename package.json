@@ -2,9 +2,6 @@
   "name": "avy-i",
   "main": "expo-router/entry",
   "version": "1.0.0",
-  "resolutions": {
-    "expo-constants": "18.0.10"
-  },
   "scripts": {
     "android": "expo start --android",
     "ios": "expo start --ios",
@@ -29,10 +26,10 @@
     "@tanstack/react-query": "^5.80.6",
     "axios": "^1.7.9",
     "date-fns": "^4.1.0",
-    "expo": "~54.0.25",
+    "expo": "~54.0.27",
     "expo-blur": "~15.0.7",
     "expo-build-properties": "~1.0.9",
-    "expo-constants": "~18.0.10",
+    "expo-constants": "~18.0.11",
     "expo-dev-client": "~6.0.17",
     "expo-document-picker": "~14.0.7",
     "expo-file-system": "~19.0.17",

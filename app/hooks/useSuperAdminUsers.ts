@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { apiConfig } from '../api/config';
+import { useAuth } from '../context/AuthContext';
 
 export interface SuperAdminUser {
   id: string;
@@ -22,6 +23,11 @@ export interface UserForm {
 
 export function useSuperAdminUsers(organizationId?: string) {
   const queryClient = useQueryClient();
+  const { authState } = useAuth();
+
+  // Only enable this query for SUPER_ADMIN users who are authenticated
+  const enabled = authState.isAuthenticated &&
+                  authState.user?.role === 'SUPER_ADMIN';
 
   // Fetch all users (optionally filtered by org)
   const {
@@ -35,6 +41,7 @@ export function useSuperAdminUsers(organizationId?: string) {
       const { data } = await axios.get<SuperAdminUser[]>(`${apiConfig.apiUrl}/api/admin/users`, { params });
       return data;
     },
+    enabled, // Only run query when user is authenticated and is SUPER_ADMIN
   });
 
   // Create user

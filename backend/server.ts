@@ -15,6 +15,8 @@ import authRoutes from './src/routes/authRoutes';
 import operatorRoutes from './src/routes/operatorRoutes';
 import meterRoutes from './src/routes/meterRoutes';
 import BackgroundMonitoringService from './src/services/backgroundMonitoringService';
+import MeterSimulationService from './src/services/meterSimulationService';
+import { MeterMigrations } from './src/utils/meterMigrations';
 
 // Load environment variables
 dotenv.config();
@@ -309,6 +311,36 @@ function startServer() {
       console.log('🔍 Testing SCADA database connections for all organizations...');
       await testAllOrgScadaConnections();
 
+      // Check and create meter_readings table for each organization
+      console.log('🔧 Checking meter_readings table in SCADA database for all organizations...');
+      try {
+        // Get all organizations
+        const organizations = await prisma.organization.findMany({
+          select: { id: true, name: true }
+        });
+
+        for (const org of organizations) {
+          try {
+            console.log(`🔍 Checking table for organization: ${org.name} (${org.id})`);
+            const tableExists = await MeterMigrations.tableExists(org.id);
+            if (!tableExists) {
+              console.log(`📊 Creating meter_readings table for ${org.name}...`);
+              await MeterMigrations.createMeterReadingsTable(org.id);
+            } else {
+              console.log(`✅ meter_readings table exists for ${org.name}`);
+              // Log some stats
+              const stats = await MeterMigrations.getTableStats(org.id);
+              console.log(`📊 ${org.name} stats: ${stats.recordCount} records, size: ${stats.size || 'unknown'}`);
+            }
+          } catch (orgError) {
+            console.error(`❌ Error for organization ${org.name}:`, orgError);
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error checking/creating meter_readings tables:', error);
+        console.log('⚠️ Continuing without meter tables - simulation may not work');
+      }
+
       // Start the background monitoring service
       console.log('🚀 Starting background monitoring service...');
       await BackgroundMonitoringService.start();
@@ -321,26 +353,32 @@ function startServer() {
 // Handle graceful shutdown
 process.on('SIGTERM', async () => {
   console.log('🛑 SIGTERM received. Shutting down gracefully...');
-  
+
   // Stop background monitoring service
   BackgroundMonitoringService.stop();
-  
+
+  // Stop all meter simulations
+  MeterSimulationService.stopAllSimulations();
+
   // Disconnect Prisma client
   await prisma.$disconnect();
-  
+
   console.log('✅ Graceful shutdown complete');
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
   console.log('🛑 SIGINT received. Shutting down gracefully...');
-  
+
   // Stop background monitoring service
   BackgroundMonitoringService.stop();
-  
+
+  // Stop all meter simulations
+  MeterSimulationService.stopAllSimulations();
+
   // Disconnect Prisma client
   await prisma.$disconnect();
-  
+
   console.log('✅ Graceful shutdown complete');
   process.exit(0);
 });

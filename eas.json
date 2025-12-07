@@ -8,9 +8,12 @@
       "node": "22.14.0",
       "developmentClient": true,
       "distribution": "internal",
+      "android": {
+        "ndk": "29.0.14206865"
+      },
       "env": {
         "EXPO_PUBLIC_PROJECT_ID": "82b3f1dd-e785-4428-b0ac-4070ea808e59",
-        "EXPO_PUBLIC_APP_VERSION": "1.0.6",
+        "EXPO_PUBLIC_APP_VERSION": "1.1.0",
         "EXPO_PUBLIC_PUSH_NOTIFICATION_ENDPOINT": "/api/notifications/token",
         "EXPO_PUBLIC_API_URL": "https://avyi-server.azurewebsites.net/",
         "EXPO_PUBLIC_SCADA_INTERVAL": "30000",
@@ -22,9 +25,12 @@
     "preview": {
       "distribution": "internal",
       "node": "22.14.0",
+      "android": {
+        "ndk": "29.0.14206865"
+      },
       "env": {
         "EXPO_PUBLIC_PROJECT_ID": "82b3f1dd-e785-4428-b0ac-4070ea808e59",
-        "EXPO_PUBLIC_APP_VERSION": "1.0.6",
+        "EXPO_PUBLIC_APP_VERSION": "1.1.0",
         "EXPO_PUBLIC_API_URL": "https://avyi-server.azurewebsites.net/",
         "EXPO_PUBLIC_PUSH_NOTIFICATION_ENDPOINT": "/api/notifications/token",
         "EXPO_PUBLIC_SCADA_INTERVAL": "30000",
@@ -35,10 +41,13 @@
     },
     "production": {
       "autoIncrement": true,
+      "android": {
+        "ndk": "29.0.14206865"
+      },
       "node": "22.14.0",
       "env": {
         "EXPO_PUBLIC_PROJECT_ID": "82b3f1dd-e785-4428-b0ac-4070ea808e59",
-        "EXPO_PUBLIC_APP_VERSION": "1.0.6",
+        "EXPO_PUBLIC_APP_VERSION": "1.1.0",
         "EXPO_PUBLIC_API_URL": "https://avyi-server.azurewebsites.net/",
         "EXPO_PUBLIC_PUSH_NOTIFICATION_ENDPOINT": "/api/notifications/token",
         "EXPO_PUBLIC_SCADA_INTERVAL": "30000",

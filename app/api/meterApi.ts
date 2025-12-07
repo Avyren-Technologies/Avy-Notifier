@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { apiConfig } from './config';
-import { getOrgHeaders } from './auth';
+import { getOrgHeaders, getAuthHeader } from './auth';
 
 // Types for meter readings
 interface MeterReading {
@@ -230,6 +230,170 @@ export const downloadMeterReport = async (id: string, organizationId?: string): 
     });
   } catch (error) {
     console.error('Error downloading meter report:', error);
+    throw error;
+  }
+};
+
+// Simulation API functions
+export interface SimulationConfig {
+  interval?: number;
+  realisticVariations?: boolean;
+  notifyOnLimits?: boolean;
+  baseValues?: {
+    voltage: number;
+    current: number;
+    frequency: number;
+    pf: number;
+    energy: number;
+    power: number;
+  };
+  variations?: {
+    voltage: number;
+    current: number;
+    frequency: number;
+    pf: number;
+    energyIncrement: number;
+    powerVariation: number;
+  };
+}
+
+export interface SimulationStatus {
+  running: boolean;
+  config?: SimulationConfig & { enabled: boolean; organizationId: string };
+  nextRun?: string;
+}
+
+/**
+ * Start meter data simulation
+ */
+export const startMeterSimulation = async (config: SimulationConfig, organizationId?: string): Promise<{ message: string }> => {
+  try {
+    const headers = await getOrgHeaders(organizationId);
+    const response = await axios.post(`${apiConfig.apiUrl}/api/meter/simulation/start`, config, { headers });
+    return response.data;
+  } catch (error) {
+    console.error('Error starting meter simulation:', error);
+    throw error;
+  }
+};
+
+/**
+ * Stop meter data simulation
+ */
+export const stopMeterSimulation = async (organizationId?: string): Promise<{ message: string }> => {
+  try {
+    const headers = await getOrgHeaders(organizationId);
+    const response = await axios.post(`${apiConfig.apiUrl}/api/meter/simulation/stop`, {}, { headers });
+    return response.data;
+  } catch (error) {
+    console.error('Error stopping meter simulation:', error);
+    throw error;
+  }
+};
+
+/**
+ * Update simulation configuration
+ */
+export const updateMeterSimulationConfig = async (config: Partial<SimulationConfig>, organizationId?: string): Promise<{ message: string }> => {
+  try {
+    const headers = await getOrgHeaders(organizationId);
+    const response = await axios.put(`${apiConfig.apiUrl}/api/meter/simulation/config`, config, { headers });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating meter simulation config:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get simulation status
+ */
+export const getMeterSimulationStatus = async (organizationId?: string): Promise<SimulationStatus> => {
+  try {
+    const headers = await getOrgHeaders(organizationId);
+    const response = await axios.get(`${apiConfig.apiUrl}/api/meter/simulation/status`, { headers });
+    return response.data.data;
+  } catch (error) {
+    console.error('Error getting meter simulation status:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get all running simulations (Super Admin only)
+ */
+export const getAllMeterSimulations = async (): Promise<Array<{
+  organizationId: string;
+  running: boolean;
+  config: SimulationConfig & { enabled: boolean; organizationId: string };
+}>> => {
+  try {
+    const headers = await getAuthHeader();
+    const response = await axios.get(`${apiConfig.apiUrl}/api/meter/simulation/all`, { headers });
+    return response.data.data;
+  } catch (error) {
+    console.error('Error getting all meter simulations:', error);
+    throw error;
+  }
+};
+
+/**
+ * Initialize sample data for demonstration
+ */
+export const initializeMeterSampleData = async (organizationId?: string): Promise<{ message: string }> => {
+  try {
+    const headers = await getOrgHeaders(organizationId);
+    const response = await axios.post(`${apiConfig.apiUrl}/api/meter/simulation/initialize`, {}, { headers });
+    return response.data;
+  } catch (error) {
+    console.error('Error initializing meter sample data:', error);
+    throw error;
+  }
+};
+
+/**
+ * Create meter readings table in SCADA database
+ */
+export const createMeterReadingsTable = async (organizationId?: string): Promise<{ message: string }> => {
+  try {
+    const headers = await getOrgHeaders(organizationId);
+    const response = await axios.post(`${apiConfig.apiUrl}/api/meter/migrations/create-table`, {}, { headers });
+    return response.data;
+  } catch (error) {
+    console.error('Error creating meter readings table:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get migration status (table existence and stats)
+ */
+export const getMeterMigrationStatus = async (organizationId?: string): Promise<{
+  exists: boolean;
+  recordCount: number;
+  lastRecord?: any;
+  size?: string;
+}> => {
+  try {
+    const headers = await getOrgHeaders(organizationId);
+    const response = await axios.get(`${apiConfig.apiUrl}/api/meter/migrations/status`, { headers });
+    return response.data.data;
+  } catch (error) {
+    console.error('Error getting migration status:', error);
+    throw error;
+  }
+};
+
+/**
+ * Drop meter readings table (for cleanup/testing)
+ */
+export const dropMeterReadingsTable = async (organizationId?: string): Promise<{ message: string }> => {
+  try {
+    const headers = await getOrgHeaders(organizationId);
+    const response = await axios.delete(`${apiConfig.apiUrl}/api/meter/migrations/drop-table`, { headers });
+    return response.data;
+  } catch (error) {
+    console.error('Error dropping meter readings table:', error);
     throw error;
   }
 };
