@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM node:20.5.0-alpine3.18 AS builder
+FROM node:24.11.1-alpine3.23 AS builder
 WORKDIR /app
 
 # 1. Copy project files, Prisma schema, server entrypoint, and source
@@ -14,7 +14,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # Stage 2: Production
-FROM node:20.5.0-alpine3.18
+FROM node:24.11.1-alpine3.23
 WORKDIR /app
 
 # 3. Copy package files & install only prod deps (skip scripts)
