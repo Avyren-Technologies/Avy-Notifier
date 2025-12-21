@@ -16,6 +16,7 @@ import operatorRoutes from './src/routes/operatorRoutes';
 import meterRoutes from './src/routes/meterRoutes';
 import BackgroundMonitoringService from './src/services/backgroundMonitoringService';
 import MeterSimulationService from './src/services/meterSimulationService';
+import MeterAnalyticsService from './src/services/meterAnalyticsService';
 import { MeterMigrations } from './src/utils/meterMigrations';
 
 // Load environment variables
@@ -284,6 +285,7 @@ function startServer() {
     console.log('/api/meter routes (meter readings)');
 
     console.log(`⏱️ Background monitoring interval: ${MONITORING_INTERVAL}ms`);
+    console.log('📊 Meter analytics service: Enabled');
     console.log('✅ Server initialization complete');
   });
 
@@ -344,6 +346,10 @@ function startServer() {
       // Start the background monitoring service
       console.log('🚀 Starting background monitoring service...');
       await BackgroundMonitoringService.start();
+
+      // Start the meter analytics service
+      console.log('🚀 Starting meter analytics service...');
+      await MeterAnalyticsService.start();
     } catch (error) {
       console.error('❌ Async startup error:', error);
     }
@@ -360,6 +366,9 @@ process.on('SIGTERM', async () => {
   // Stop all meter simulations
   MeterSimulationService.stopAllSimulations();
 
+  // Stop meter analytics service
+  MeterAnalyticsService.stop();
+
   // Disconnect Prisma client
   await prisma.$disconnect();
 
@@ -375,6 +384,9 @@ process.on('SIGINT', async () => {
 
   // Stop all meter simulations
   MeterSimulationService.stopAllSimulations();
+
+  // Stop meter analytics service
+  MeterAnalyticsService.stop();
 
   // Disconnect Prisma client
   await prisma.$disconnect();
