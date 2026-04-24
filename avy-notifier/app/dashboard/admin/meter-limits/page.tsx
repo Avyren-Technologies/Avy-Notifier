@@ -1,24 +1,28 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import {
+  Zap,
+  Battery,
+  ChevronRight,
+  RefreshCw,
+  Info,
+  Pencil,
+  ArrowUpDown,
+  Gauge,
+  Activity,
+  Waves,
+  TrendingUp,
+  BatteryCharging,
+  CircuitBoard,
+} from 'lucide-react';
 import { useAuth } from '../../../context/auth-context';
 import { useMeterLimits, useUpdateMeterLimit } from '../../../hooks/use-meter-readings';
 import type { MeterLimit } from '../../../types/meter';
-import { Button, Spinner } from '../../../components/ui/button';
+import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
-import { Badge } from '../../../components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
 import { Skeleton } from '../../../components/ui/skeleton';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-  TableEmpty,
-} from '../../../components/ui/data-table';
 import {
   Modal,
   ModalContent,
@@ -27,57 +31,249 @@ import {
   ModalTitle,
   ModalDescription,
 } from '../../../components/ui/modal';
+import { cn } from '../../../lib/utils';
 
-// ─── Page ───────────────────────────────────────────────────────────────────
+// ─── Parameter visual config ─────────────────────────────────────────────────
+
+const PARAMETER_CONFIG: Record<
+  string,
+  {
+    icon: React.ElementType;
+    color: string;
+    gradient: string;
+    bgTint: string;
+    accentBorder: string;
+  }
+> = {
+  voltage: {
+    icon: Zap,
+    color: 'text-amber-500',
+    gradient: 'from-amber-500/20 to-amber-600/5',
+    bgTint: 'bg-amber-500/10',
+    accentBorder: 'border-l-amber-500',
+  },
+  current: {
+    icon: Activity,
+    color: 'text-cyan-500',
+    gradient: 'from-cyan-500/20 to-cyan-600/5',
+    bgTint: 'bg-cyan-500/10',
+    accentBorder: 'border-l-cyan-500',
+  },
+  frequency: {
+    icon: Waves,
+    color: 'text-emerald-500',
+    gradient: 'from-emerald-500/20 to-emerald-600/5',
+    bgTint: 'bg-emerald-500/10',
+    accentBorder: 'border-l-emerald-500',
+  },
+  power: {
+    icon: TrendingUp,
+    color: 'text-orange-500',
+    gradient: 'from-orange-500/20 to-orange-600/5',
+    bgTint: 'bg-orange-500/10',
+    accentBorder: 'border-l-orange-500',
+  },
+  energy: {
+    icon: BatteryCharging,
+    color: 'text-rose-500',
+    gradient: 'from-rose-500/20 to-rose-600/5',
+    bgTint: 'bg-rose-500/10',
+    accentBorder: 'border-l-rose-500',
+  },
+  pf: {
+    icon: CircuitBoard,
+    color: 'text-violet-500',
+    gradient: 'from-violet-500/20 to-violet-600/5',
+    bgTint: 'bg-violet-500/10',
+    accentBorder: 'border-l-violet-500',
+  },
+};
+
+function getParamConfig(parameter: string) {
+  return (
+    PARAMETER_CONFIG[parameter] ?? {
+      icon: Gauge,
+      color: 'text-muted-foreground',
+      gradient: 'from-muted/20 to-muted/5',
+      bgTint: 'bg-muted/10',
+      accentBorder: 'border-l-muted-foreground',
+    }
+  );
+}
+
+// ─── Limit Card ──────────────────────────────────────────────────────────────
+
+function LimitCard({
+  limit,
+  onEdit,
+}: {
+  limit: MeterLimit;
+  onEdit: (limit: MeterLimit) => void;
+}) {
+  const config = getParamConfig(limit.parameter);
+  const Icon = config.icon;
+
+  return (
+    <button
+      onClick={() => onEdit(limit)}
+      className={cn(
+        'group relative flex w-full items-center gap-4 rounded-xl border border-border/60 p-4',
+        'border-l-[3px] transition-all duration-200',
+        'hover:border-border hover:shadow-md hover:shadow-black/5',
+        'dark:hover:shadow-black/20',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        config.accentBorder,
+      )}
+    >
+      {/* Icon */}
+      <div
+        className={cn(
+          'flex h-11 w-11 shrink-0 items-center justify-center rounded-lg',
+          config.bgTint,
+        )}
+      >
+        <Icon className={cn('h-5 w-5', config.color)} />
+      </div>
+
+      {/* Info */}
+      <div className="flex-1 text-left">
+        <h3 className="text-[15px] font-semibold text-foreground">
+          {limit.description}
+        </h3>
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-muted-foreground">
+          <span>
+            High Limit:{' '}
+            <span className="font-semibold text-foreground">
+              {limit.highLimit} {limit.unit}
+            </span>
+          </span>
+          {limit.lowLimit !== null && (
+            <>
+              <span className="hidden text-border sm:inline">|</span>
+              <span>
+                Low Limit:{' '}
+                <span className="font-semibold text-foreground">
+                  {limit.lowLimit} {limit.unit}
+                </span>
+              </span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Edit indicator */}
+      <div
+        className={cn(
+          'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
+          'bg-muted/50 text-muted-foreground',
+          'transition-all duration-200',
+          'group-hover:bg-primary/10 group-hover:text-primary',
+        )}
+      >
+        <ChevronRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+      </div>
+    </button>
+  );
+}
+
+// ─── Section ─────────────────────────────────────────────────────────────────
+
+function Section({
+  title,
+  icon: Icon,
+  iconColor,
+  children,
+}: {
+  title: string;
+  icon: React.ElementType;
+  iconColor: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <div className="mb-3 flex items-center gap-2.5">
+        <Icon className={cn('h-[18px] w-[18px]', iconColor)} />
+        <h2 className="text-base font-semibold tracking-tight text-foreground">
+          {title}
+        </h2>
+      </div>
+      <div className="flex flex-col gap-3">{children}</div>
+    </section>
+  );
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function MeterLimitsPage() {
   const { authState } = useAuth();
   const router = useRouter();
-  const isAdmin = authState?.user?.role === 'ADMIN';
+  const isAdmin =
+    authState?.user?.role === 'ADMIN' ||
+    authState?.user?.role === 'SUPER_ADMIN';
 
-  // ── Fetch limits ────────────────────────────────────────────────────────
+  // ── Fetch limits ──────────────────────────────────────────────────────────
   const { data: limits, isLoading, isError, refetch } = useMeterLimits();
   const updateMutation = useUpdateMeterLimit();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // ── Edit state ──────────────────────────────────────────────────────────
+  // ── Edit state ────────────────────────────────────────────────────────────
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingLimit, setEditingLimit] = useState<MeterLimit | null>(null);
   const [editHighLimit, setEditHighLimit] = useState('');
   const [editLowLimit, setEditLowLimit] = useState('');
-  const [editErrors, setEditErrors] = useState<{ high?: string; low?: string }>({});
+  const [editErrors, setEditErrors] = useState<{ high?: string; low?: string }>(
+    {},
+  );
 
-  // ── Guard: admin-only ──────────────────────────────────────────────────
+  // ── Guard: admin-only ─────────────────────────────────────────────────────
   useEffect(() => {
     if (!authState.isLoading && !isAdmin) {
       router.replace('/dashboard');
     }
   }, [authState.isLoading, isAdmin, router]);
 
-  // ── Group limits ──────────────────────────────────────────────────────
-  const electricalParams =
-    limits?.filter((l) =>
-      ['voltage', 'current', 'frequency'].includes(l.parameter),
-    ) || [];
+  // ── Group limits ──────────────────────────────────────────────────────────
+  const electricalParams = useMemo(
+    () =>
+      limits?.filter((l) =>
+        ['voltage', 'current', 'frequency'].includes(l.parameter),
+      ) ?? [],
+    [limits],
+  );
 
-  const powerParams =
-    limits?.filter((l) => ['power', 'energy', 'pf'].includes(l.parameter)) || [];
+  const powerParams = useMemo(
+    () =>
+      limits?.filter((l) =>
+        ['power', 'energy', 'pf'].includes(l.parameter),
+      ) ?? [],
+    [limits],
+  );
 
-  const otherParams =
-    limits?.filter(
-      (l) =>
-        !['voltage', 'current', 'frequency', 'power', 'energy', 'pf'].includes(
-          l.parameter,
-        ),
-    ) || [];
+  const otherParams = useMemo(
+    () =>
+      limits?.filter(
+        (l) =>
+          !['voltage', 'current', 'frequency', 'power', 'energy', 'pf'].includes(
+            l.parameter,
+          ),
+      ) ?? [],
+    [limits],
+  );
 
-  // ── Handlers ──────────────────────────────────────────────────────────
+  // ── Handlers ──────────────────────────────────────────────────────────────
   const handleEdit = useCallback((limit: MeterLimit) => {
     setEditingLimit(limit);
     setEditHighLimit(limit.highLimit.toString());
-    setEditLowLimit(limit.lowLimit?.toString() || '');
+    setEditLowLimit(limit.lowLimit?.toString() ?? '');
     setEditErrors({});
     setEditModalOpen(true);
   }, []);
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setIsRefreshing(false);
+  }, [refetch]);
 
   const handleSave = useCallback(() => {
     const errors: { high?: string; low?: string } = {};
@@ -90,6 +286,9 @@ export default function MeterLimitsPage() {
     if (editLowLimit.trim() && low !== null && isNaN(low)) {
       errors.low = 'Please enter a valid number';
     }
+    if (high && low !== null && !isNaN(low) && low >= high) {
+      errors.low = 'Low limit must be less than high limit';
+    }
 
     if (Object.keys(errors).length > 0) {
       setEditErrors(errors);
@@ -97,7 +296,9 @@ export default function MeterLimitsPage() {
     }
 
     if (editingLimit) {
-      const values: { highLimit?: number; lowLimit?: number } = { highLimit: high };
+      const values: { highLimit?: number; lowLimit?: number } = {
+        highLimit: high,
+      };
       if (low !== null) values.lowLimit = low;
 
       updateMutation.mutate(
@@ -112,226 +313,136 @@ export default function MeterLimitsPage() {
     }
   }, [editHighLimit, editLowLimit, editingLimit, updateMutation]);
 
-  // ── Loading ───────────────────────────────────────────────────────────
+  // ── Loading ───────────────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="space-y-6 p-6">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-64 w-full" />
-        <Skeleton className="h-64 w-full" />
+      <div className="space-y-8 p-6">
+        <div>
+          <Skeleton className="h-7 w-44" />
+          <Skeleton className="mt-2 h-4 w-72" />
+        </div>
+        <div className="space-y-3">
+          <Skeleton className="h-5 w-48" />
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-[76px] w-full rounded-xl" />
+          ))}
+        </div>
+        <div className="space-y-3">
+          <Skeleton className="h-5 w-40" />
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-[76px] w-full rounded-xl" />
+          ))}
+        </div>
       </div>
     );
   }
 
-  // ── Error ─────────────────────────────────────────────────────────────
+  // ── Error ─────────────────────────────────────────────────────────────────
   if (isError) {
     return (
-      <div className="flex h-96 flex-col items-center justify-center gap-4 p-6">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="48"
-          height="48"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-destructive"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="8" x2="12" y2="12" />
-          <line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-        <h3 className="text-lg font-semibold text-foreground">
-          Error Loading Limits
-        </h3>
-        <Button onClick={() => refetch()}>Retry</Button>
+      <div className="flex h-[60vh] flex-col items-center justify-center gap-5 p-6">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10">
+          <Zap className="h-8 w-8 text-destructive" />
+        </div>
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-foreground">
+            Error Loading Limits
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Could not fetch parameter limits. Please try again.
+          </p>
+        </div>
+        <Button onClick={handleRefresh} className="gap-2">
+          <RefreshCw className="h-4 w-4" />
+          Retry
+        </Button>
       </div>
     );
   }
 
-  // ── Render table section ──────────────────────────────────────────────
-  const renderSection = (
-    title: string,
-    icon: React.ReactNode,
-    items: MeterLimit[],
-  ) => {
-    if (items.length === 0) return null;
-    return (
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            {icon}
-            {title}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Parameter</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Unit</TableHead>
-                <TableHead className="text-right">Low Limit</TableHead>
-                <TableHead className="text-right">High Limit</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((limit) => (
-                <TableRow key={limit.id}>
-                  <TableCell className="font-medium capitalize">
-                    {limit.parameter}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {limit.description}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{limit.unit}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {limit.lowLimit !== null ? limit.lowLimit : '--'}
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {limit.highLimit}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(limit)}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="mr-1"
-                      >
-                        <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                        <path d="m15 5 4 4" />
-                      </svg>
-                      Edit
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    );
-  };
-
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-6 p-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          Parameter Limits
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Configure thresholds for meter readings
+    <div className="mx-auto max-w-3xl space-y-8 p-6">
+      {/* ── Header ─────────────────────────────────────────────────────── */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Parameter Limits
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Configure thresholds for meter readings
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="gap-2"
+        >
+          <RefreshCw
+            className={cn('h-3.5 w-3.5', isRefreshing && 'animate-spin')}
+          />
+          Refresh
+        </Button>
+      </div>
+
+      {/* ── Electrical Parameters ───────────────────────────────────────── */}
+      {electricalParams.length > 0 && (
+        <Section
+          title="Electrical Parameters"
+          icon={Zap}
+          iconColor="text-amber-500"
+        >
+          {electricalParams.map((limit) => (
+            <LimitCard key={limit.id} limit={limit} onEdit={handleEdit} />
+          ))}
+        </Section>
+      )}
+
+      {/* ── Power Parameters ────────────────────────────────────────────── */}
+      {powerParams.length > 0 && (
+        <Section
+          title="Power Parameters"
+          icon={Battery}
+          iconColor="text-emerald-500"
+        >
+          {powerParams.map((limit) => (
+            <LimitCard key={limit.id} limit={limit} onEdit={handleEdit} />
+          ))}
+        </Section>
+      )}
+
+      {/* ── Other Parameters ────────────────────────────────────────────── */}
+      {otherParams.length > 0 && (
+        <Section
+          title="Other Parameters"
+          icon={ArrowUpDown}
+          iconColor="text-blue-500"
+        >
+          {otherParams.map((limit) => (
+            <LimitCard key={limit.id} limit={limit} onEdit={handleEdit} />
+          ))}
+        </Section>
+      )}
+
+      {/* ── Help tip ────────────────────────────────────────────────────── */}
+      <div
+        className={cn(
+          'flex gap-3.5 rounded-xl border p-4',
+          'border-emerald-500/20 bg-emerald-500/5',
+          'dark:border-emerald-400/15 dark:bg-emerald-400/5',
+        )}
+      >
+        <Info className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+        <p className="text-sm leading-relaxed text-emerald-800 dark:text-emerald-300/90">
+          Configure thresholds to trigger notifications when meter readings
+          exceed their limits. Tap on any parameter to edit its high and low
+          limits.
         </p>
       </div>
 
-      {/* Electrical Parameters */}
-      {renderSection(
-        'Electrical Parameters',
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-warning"
-        >
-          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-        </svg>,
-        electricalParams,
-      )}
-
-      {/* Power Parameters */}
-      {renderSection(
-        'Power Parameters',
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-success"
-        >
-          <rect x="1" y="6" width="18" height="12" rx="2" ry="2" />
-          <line x1="23" y1="13" x2="23" y2="11" />
-        </svg>,
-        powerParams,
-      )}
-
-      {/* Other Parameters */}
-      {renderSection(
-        'Other Parameters',
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="text-info"
-        >
-          <line x1="18" y1="20" x2="18" y2="10" />
-          <line x1="12" y1="20" x2="12" y2="4" />
-          <line x1="6" y1="20" x2="6" y2="14" />
-        </svg>,
-        otherParams,
-      )}
-
-      {/* Help info */}
-      <Card className="border-success/30 bg-success/5">
-        <CardContent className="flex gap-3 p-4">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="mt-0.5 shrink-0 text-success"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="16" x2="12" y2="12" />
-            <line x1="12" y1="8" x2="12.01" y2="8" />
-          </svg>
-          <p className="text-sm text-muted-foreground">
-            Configure thresholds to trigger notifications when meter readings exceed
-            their limits. Click &quot;Edit&quot; on any parameter to modify its high
-            and low limits.
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* ── Edit Limit Modal ─────────────────────────────────────── */}
+      {/* ── Edit Modal ──────────────────────────────────────────────────── */}
       <Modal
         open={editModalOpen}
         onOpenChange={(open) => {
@@ -341,9 +452,25 @@ export default function MeterLimitsPage() {
           }
         }}
       >
-        <ModalContent className="max-w-sm">
+        <ModalContent className="max-w-md">
           <ModalHeader>
-            <ModalTitle>Edit Limit</ModalTitle>
+            <ModalTitle className="flex items-center gap-2.5">
+              {editingLimit && (() => {
+                const cfg = getParamConfig(editingLimit.parameter);
+                const Ic = cfg.icon;
+                return (
+                  <span
+                    className={cn(
+                      'flex h-8 w-8 items-center justify-center rounded-lg',
+                      cfg.bgTint,
+                    )}
+                  >
+                    <Ic className={cn('h-4 w-4', cfg.color)} />
+                  </span>
+                );
+              })()}
+              Edit Limit
+            </ModalTitle>
             <ModalDescription>
               {editingLimit
                 ? `Configure limits for ${editingLimit.description}`
@@ -351,9 +478,9 @@ export default function MeterLimitsPage() {
             </ModalDescription>
           </ModalHeader>
 
-          <div className="mt-4 space-y-4">
+          <div className="mt-5 space-y-4">
             <Input
-              label={`High Limit (${editingLimit?.unit || ''})`}
+              label={`High Limit${editingLimit?.unit ? ` (${editingLimit.unit})` : ''}`}
               type="number"
               value={editHighLimit}
               onChange={(e) => {
@@ -365,7 +492,7 @@ export default function MeterLimitsPage() {
               placeholder="Enter high limit"
             />
             <Input
-              label={`Low Limit (${editingLimit?.unit || ''})`}
+              label={`Low Limit${editingLimit?.unit ? ` (${editingLimit.unit})` : ''}`}
               type="number"
               value={editLowLimit}
               onChange={(e) => {
@@ -389,11 +516,15 @@ export default function MeterLimitsPage() {
             >
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={updateMutation.isPending}>
-              {updateMutation.isPending ? (
-                <Spinner className="mr-1.5 h-3.5 w-3.5" />
-              ) : null}
-              Save
+            <Button
+              onClick={handleSave}
+              disabled={updateMutation.isPending}
+              className="gap-2"
+            >
+              {updateMutation.isPending && (
+                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+              )}
+              Save Changes
             </Button>
           </ModalFooter>
         </ModalContent>

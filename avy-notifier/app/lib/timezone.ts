@@ -127,6 +127,17 @@ export const formatTimestampIST = (dateString: string): string => {
  */
 export const formatTimestampWithSecondsIST = (dateString: string): string => {
   try {
+    // Handle bare time strings like "23:48:43" — already in IST, just format them
+    const bareTimeMatch = /^(\d{1,2}):(\d{2}):(\d{2})$/.exec(dateString);
+    if (bareTimeMatch) {
+      let hours = parseInt(bareTimeMatch[1], 10);
+      const minutes = bareTimeMatch[2];
+      const seconds = bareTimeMatch[3];
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12 || 12;
+      return `${hours.toString().padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+    }
+
     const hasTimezone =
       dateString.includes('Z') ||
       dateString.includes('+') ||

@@ -6,6 +6,8 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
+  Flame,
+  Zap,
   BarChart3,
   Bell,
   FileText,
@@ -33,8 +35,6 @@ interface NavItem {
   label: string;
   href: string;
   icon: React.ElementType;
-  /** If true, href is computed dynamically based on selectedAppType */
-  dynamic?: boolean;
 }
 
 interface NavGroup {
@@ -53,10 +53,17 @@ interface SidebarProps {
 
 const NAV_GROUPS: NavGroup[] = [
   {
+    title: 'DASHBOARDS',
+    visible: () => true,
+    items: [
+      { label: 'Furnace Dashboard', href: '/dashboard/operator', icon: Flame },
+      { label: 'Meter Dashboard', href: '/dashboard/meter-readings', icon: Zap },
+    ],
+  },
+  {
     title: 'MAIN',
     visible: () => true,
     items: [
-      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, dynamic: true },
       { label: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
       { label: 'Alarm History', href: '/dashboard/alarms', icon: Bell },
       { label: 'Reports', href: '/dashboard/reports', icon: FileText },
@@ -98,30 +105,12 @@ const SIDEBAR_COLLAPSED = 72;
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
-  const { authState, selectedAppType } = useAuth();
+  const { authState } = useAuth();
   const role = authState.user?.role ?? null;
-
-  /** Resolve the href for the Dashboard link based on selected app type */
-  function resolveHref(item: NavItem): string {
-    if (item.dynamic) {
-      return selectedAppType === 'meter'
-        ? '/dashboard/meter-readings'
-        : '/dashboard/operator';
-    }
-    return item.href;
-  }
 
   /** Check if the current item is the active route */
   function isActive(item: NavItem): boolean {
-    const href = resolveHref(item);
-    if (item.dynamic) {
-      return (
-        pathname === '/dashboard' ||
-        pathname === '/dashboard/operator' ||
-        pathname === '/dashboard/meter-readings'
-      );
-    }
-    return pathname === href || pathname.startsWith(href + '/');
+    return pathname === item.href || pathname.startsWith(item.href + '/');
   }
 
   return (
@@ -193,7 +182,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               {/* Items */}
               <ul className="space-y-1">
                 {group.items.map((item) => {
-                  const href = resolveHref(item);
+                  const href = item.href;
                   const active = isActive(item);
                   const Icon = item.icon;
 
