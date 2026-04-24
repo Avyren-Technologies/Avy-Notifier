@@ -9,6 +9,7 @@ import MeterSimulationService from '../services/meterSimulationService';
 import { MeterMigrations } from '../utils/meterMigrations';
 import ExcelJS from 'exceljs';
 import { format as formatDate } from 'date-fns';
+import { getFirstString } from '../utils/requestValue';
 
 const router = Router();
 
@@ -138,12 +139,12 @@ router.get('/history', authenticate, asyncHandler(async (req: Request, res: Resp
   const client = await getClientWithRetry(getRequestOrgId(req));
   
   // Parse pagination parameters
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 20;
+  const page = parseInt(getFirstString(req.query.page) || '1', 10) || 1;
+  const limit = parseInt(getFirstString(req.query.limit) || '20', 10) || 20;
   const offset = (page - 1) * limit;
   
-  const hours = parseInt(req.query.hours as string) || 1; // Default to 1 hour
-  const startTime = req.query.startTime as string; // Optional specific start time
+  const hours = parseInt(getFirstString(req.query.hours) || '1', 10) || 1; // Default to 1 hour
+  const startTime = getFirstString(req.query.startTime); // Optional specific start time
   
   try {
     let query: string;
@@ -261,7 +262,13 @@ router.get('/limits', authenticate, asyncHandler(async (req: Request, res: Respo
  * @access  Private (Admin only)
  */
 router.put('/limits/:id', authenticate, authorize(['ADMIN']), asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = getFirstString(req.params.id);
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      message: 'Meter limit id is required',
+    });
+  }
   const { highLimit, lowLimit } = req.body;
   
   // Add validation to ensure proper values
@@ -893,7 +900,13 @@ router.get('/reports', authenticate, asyncHandler(async (req: Request, res: Resp
  * @access  Private
  */
 router.get('/reports/:id', authenticate, asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = getFirstString(req.params.id);
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      message: 'Report id is required',
+    });
+  }
   const userId = req.user?.id;
 
   if (!userId) {

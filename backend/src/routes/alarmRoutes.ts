@@ -4,6 +4,7 @@ import { createError } from '../middleware/errorHandler';
 import { authenticate, authorize, getRequestOrgId } from '../middleware/authMiddleware';
 import { Router } from 'express';
 import { NotificationService } from '../services/notificationService';
+import { getFirstString } from '../utils/requestValue';
 
 const router = Router();
 
@@ -77,7 +78,10 @@ router.get('/active', async (req: Request, res: Response, next: NextFunction) =>
  */
 router.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
+    const id = getFirstString(req.params.id);
+    if (!id) {
+      throw createError('Alarm id is required', 400);
+    }
     
     const alarm = await prisma.alarm.findUnique({
       where: { id },
@@ -157,7 +161,10 @@ router.post('/', authorize(['ADMIN']), async (req: Request, res: Response, next:
  */
 router.patch('/:id/status', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
+    const id = getFirstString(req.params.id);
+    if (!id) {
+      throw createError('Alarm id is required', 400);
+    }
     const { status, resolutionMessage } = req.body;
     const userId = req.user?.id;
     
@@ -244,12 +251,12 @@ router.patch('/:id/status', async (req: Request, res: Response, next: NextFuncti
     // Send notification with user information
     await NotificationService.createNotification({
       title: status === 'RESOLVED' 
-        ? `${alarm.description} - Resolved by ${updatedAlarm.resolvedBy?.name}` 
+        ? `${alarm.description} - Resolved by ${updatedAlarm.resolvedById ?? 'user'}` 
         : `${alarm.severity} Alarm: ${alarm.description}`,
       body: status === 'RESOLVED' && resolutionMessage
-        ? `${alarm.description} resolved by ${updatedAlarm.resolvedBy?.name}: ${resolutionMessage}`
+        ? `${alarm.description} resolved by ${updatedAlarm.resolvedById ?? 'user'}: ${resolutionMessage}`
         : status === 'ACKNOWLEDGED'
-        ? `${alarm.description} acknowledged by ${updatedAlarm.acknowledgedBy?.name}`
+        ? `${alarm.description} acknowledged by ${updatedAlarm.acknowledgedById ?? 'user'}`
         : `${alarm.description} - Value: ${alarm.value}${alarm.unit ? ` ${alarm.unit}` : ''}`,
       severity: alarm.severity,
       type: status === 'RESOLVED' ? 'INFO' : 'ALARM',
@@ -270,8 +277,8 @@ router.patch('/:id/status', async (req: Request, res: Response, next: NextFuncti
 router.get('/history', async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Get query parameters
-    const { hours = '24' } = req.query;
-    const hoursAgo = parseInt(hours as string, 10) || 24;
+    const hours = getFirstString(req.query.hours) || '24';
+    const hoursAgo = parseInt(hours, 10) || 24;
     
     // Calculate time threshold
     const timeThreshold = new Date();

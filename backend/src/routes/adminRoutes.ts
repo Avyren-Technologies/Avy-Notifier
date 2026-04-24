@@ -6,6 +6,7 @@ import { authenticate, authorize, getRequestOrgId } from '../middleware/authMidd
 import { Router } from 'express';
 import BackgroundMonitoringService from '../services/backgroundMonitoringService';
 import { forceRefreshSchemaConfig } from '../services/scadaService';
+import { getFirstString } from '../utils/requestValue';
 
 const router = Router();
 
@@ -65,7 +66,7 @@ router.post('/users', async (req: Request, res: Response, next: NextFunction) =>
     // Determine organizationId
     let organizationId: string;
     if (req.user?.role === 'SUPER_ADMIN') {
-      organizationId = orgIdFromBody || req.body.organizationId || req.query.organizationId;
+      organizationId = orgIdFromBody || req.body.organizationId || getFirstString(req.query.organizationId) || '';
       if (!organizationId) throw createError('organizationId is required for SUPER_ADMIN', 400);
     } else {
       organizationId = getRequestOrgId(req);
@@ -110,7 +111,10 @@ router.post('/users', async (req: Request, res: Response, next: NextFunction) =>
  */
 router.put('/users/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
+    const id = getFirstString(req.params.id);
+    if (!id) {
+      throw createError('User id is required', 400);
+    }
     const { name, email, role, password, organizationId: orgIdFromBody } = req.body;
     if (!name && !email && !role && !password && !orgIdFromBody) {
       throw createError('No update data provided', 400);
@@ -121,7 +125,7 @@ router.put('/users/:id', async (req: Request, res: Response, next: NextFunction)
     // Determine organizationId
     let organizationId: string | undefined = undefined;
     if (req.user?.role === 'SUPER_ADMIN') {
-      organizationId = orgIdFromBody || req.body.organizationId || req.query.organizationId;
+      organizationId = orgIdFromBody || req.body.organizationId || getFirstString(req.query.organizationId);
     } else {
       organizationId = getRequestOrgId(req);
     }
@@ -184,7 +188,10 @@ router.put('/users/:id', async (req: Request, res: Response, next: NextFunction)
  */
 router.delete('/users/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
+    const id = getFirstString(req.params.id);
+    if (!id) {
+      throw createError('User id is required', 400);
+    }
     // Find user to delete
     const userToDelete = await prisma.user.findUnique({
       where: { id },
@@ -296,7 +303,10 @@ router.post('/setpoints', async (req, res) => {
 // Update a setpoint configuration
 router.put('/setpoints/:id', async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = getFirstString(req.params.id);
+    if (!id) {
+      throw createError('Setpoint id is required', 400);
+    }
     const { lowDeviation, highDeviation } = req.body;
     const organizationId = getRequestOrgId(req);
     const setpoint = await prisma.setpoint.update({
@@ -419,7 +429,10 @@ router.post('/organizations', async (req: Request, res: Response, next: NextFunc
 });
 router.put('/organizations/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
+    const id = getFirstString(req.params.id);
+    if (!id) {
+      throw createError('Organization id is required', 400);
+    }
     const { name, scadaDbConfig, schemaConfig } = req.body;
     
     // Get the current organization to check if schema config is being updated
@@ -456,7 +469,10 @@ router.put('/organizations/:id', async (req: Request, res: Response, next: NextF
  */
 router.patch('/organizations/:id/toggle-status', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
+    const id = getFirstString(req.params.id);
+    if (!id) {
+      throw createError('Organization id is required', 400);
+    }
     const { isEnabled } = req.body;
     
     // Only SUPER_ADMIN can toggle organization status
@@ -489,7 +505,10 @@ router.patch('/organizations/:id/toggle-status', async (req: Request, res: Respo
 });
 router.delete('/organizations/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.params;
+    const id = getFirstString(req.params.id);
+    if (!id) {
+      throw createError('Organization id is required', 400);
+    }
     // Perform cascading delete in a transaction
     await prisma.$transaction([
       // Delete NotificationSettings
@@ -668,7 +687,10 @@ router.post('/monitoring/force-org/:orgId', async (req: Request, res: Response, 
       throw createError('Forbidden', 403);
     }
 
-    const { orgId } = req.params;
+    const orgId = getFirstString(req.params.orgId);
+    if (!orgId) {
+      throw createError('Organization id is required', 400);
+    }
     await BackgroundMonitoringService.forceMonitorOrganization(orgId);
     res.json({ message: `Monitoring forced for organization ${orgId}` });
   } catch (error) {

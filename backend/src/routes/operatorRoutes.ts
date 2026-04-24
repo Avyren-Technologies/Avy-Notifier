@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import prisma from '../config/db';
 import { createError } from '../middleware/errorHandler';
 import { authenticate, authorize } from '../middleware/authMiddleware';
+import { getFirstString } from '../utils/requestValue';
 
 const router = express.Router();
 
@@ -85,7 +86,10 @@ router.get('/alarms/assigned', async (req: Request, res: Response, next: NextFun
  */
 router.post('/notes/:alarmId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { alarmId } = req.params;
+    const alarmId = getFirstString(req.params.alarmId);
+    if (!alarmId) {
+      throw createError('Alarm id is required', 400);
+    }
     const { notes } = req.body;
     
     if (!notes) {

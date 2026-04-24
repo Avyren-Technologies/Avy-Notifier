@@ -4,6 +4,7 @@ import { getRequestOrgId } from '../middleware/authMiddleware';
 import { Expo, ExpoPushMessage } from 'expo-server-sdk';
 import { NotificationService } from '../services/notificationService';
 import prisma from '../config/db';
+import { getFirstString } from '../utils/requestValue';
 
 const router = Router();
 const expo = new Expo();
@@ -51,11 +52,11 @@ router.get('/', authenticate, asyncHandler(async (req, res) => {
     return;
   }
   
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 20;
+  const page = parseInt(getFirstString(req.query.page) || '1', 10) || 1;
+  const limit = parseInt(getFirstString(req.query.limit) || '20', 10) || 20;
   const skip = (page - 1) * limit;
-  const filter = req.query.filter as string || 'all';
-  const source = req.query.source as string;
+  const filter = getFirstString(req.query.filter) || 'all';
+  const source = getFirstString(req.query.source);
   
   console.log(`🔍 Notifications request - Page: ${page}, Limit: ${limit}, Filter: ${filter}, Source: ${source}, UserId: ${userId}`);
   
@@ -126,8 +127,12 @@ router.get('/', authenticate, asyncHandler(async (req, res) => {
 
 // Mark notification as read
 router.patch('/:id/read', authenticate, asyncHandler(async (req, res) => {
-  const notificationId = req.params.id;
+  const notificationId = getFirstString(req.params.id);
   const userId = req.user?.id;
+  if (!notificationId) {
+    res.status(400).json({ message: 'Notification id is required' });
+    return;
+  }
   
   if (!userId) {
     res.status(401).json({ message: 'User not authenticated' });
@@ -179,8 +184,12 @@ router.patch('/mark-all-read', authenticate, asyncHandler(async (req, res) => {
 
 // Delete a notification
 router.delete('/:id', authenticate, asyncHandler(async (req, res) => {
-  const notificationId = req.params.id;
+  const notificationId = getFirstString(req.params.id);
   const userId = req.user?.id;
+  if (!notificationId) {
+    res.status(400).json({ message: 'Notification id is required' });
+    return;
+  }
   
   if (!userId) {
     res.status(401).json({ message: 'User not authenticated' });

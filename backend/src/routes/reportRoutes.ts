@@ -3,6 +3,7 @@ import { getClientWithRetry } from '../config/scadaDb';
 import { authenticate } from '../middleware/authMiddleware';
 import { getRequestOrgId } from '../middleware/authMiddleware';
 import prisma from '../config/db';
+import { getFirstString } from '../utils/requestValue';
 
 const router: Router = express.Router();
 
@@ -201,7 +202,7 @@ router.get('/alarm-data', function(req: Request, res: Response) {
         query += ' ORDER BY created_timestamp DESC';
         
         // Add limit if needed
-        const limit = req.query.limit ? parseInt(req.query.limit as string) : 1000;
+        const limit = req.query.limit ? parseInt(getFirstString(req.query.limit) || '1000', 10) : 1000;
         if (!isNaN(limit) && limit > 0) {
           query += ` LIMIT $${paramIndex}`;
           queryParams.push(limit);
@@ -268,8 +269,8 @@ router.get('/furnace', function(req: Request, res: Response) {
       }
 
       // Parse pagination parameters
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const page = parseInt(getFirstString(req.query.page) || '1', 10) || 1;
+      const limit = parseInt(getFirstString(req.query.limit) || '10', 10) || 10;
       const skip = (page - 1) * limit;
 
       const organizationId = getRequestOrgId(req);
@@ -414,7 +415,10 @@ router.get('/furnace/:id', function(req: Request, res: Response) {
   (async () => {
     try {
       const userId = (req as any).user?.id;
-      const reportId = req.params.id;
+      const reportId = getFirstString(req.params.id);
+      if (!reportId) {
+        return res.status(400).json({ error: 'Report id is required' });
+      }
 
       if (!userId) {
         return res.status(401).json({ error: 'User not authenticated' });

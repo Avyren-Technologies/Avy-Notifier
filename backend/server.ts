@@ -17,6 +17,7 @@ import meterRoutes from './src/routes/meterRoutes';
 import BackgroundMonitoringService from './src/services/backgroundMonitoringService';
 import MeterSimulationService from './src/services/meterSimulationService';
 import MeterAnalyticsService from './src/services/meterAnalyticsService';
+import DemoScadaWriterService from './src/services/demoScadaWriterService';
 import { MeterMigrations } from './src/utils/meterMigrations';
 
 // Load environment variables
@@ -350,6 +351,9 @@ function startServer() {
       // Start the meter analytics service
       console.log('🚀 Starting meter analytics service...');
       await MeterAnalyticsService.start();
+
+      // Start demo SCADA writer (optional, controlled by env)
+      DemoScadaWriterService.start();
     } catch (error) {
       console.error('❌ Async startup error:', error);
     }
@@ -369,6 +373,9 @@ process.on('SIGTERM', async () => {
   // Stop meter analytics service
   MeterAnalyticsService.stop();
 
+  // Stop demo SCADA writer service
+  await DemoScadaWriterService.stop();
+
   // Disconnect Prisma client
   await prisma.$disconnect();
 
@@ -387,6 +394,9 @@ process.on('SIGINT', async () => {
 
   // Stop meter analytics service
   MeterAnalyticsService.stop();
+
+  // Stop demo SCADA writer service
+  await DemoScadaWriterService.stop();
 
   // Disconnect Prisma client
   await prisma.$disconnect();
