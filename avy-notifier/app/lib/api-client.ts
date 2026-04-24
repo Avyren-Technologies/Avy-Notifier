@@ -2,9 +2,10 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const BASE_URL =
+const BASE_URL = (
   process.env.NEXT_PUBLIC_API_URL ||
-  'https://Avy-I-server-eyckc9gmbvf7bqgq.centralindia-01.azurewebsites.net';
+  'https://Avy-I-server-eyckc9gmbvf7bqgq.centralindia-01.azurewebsites.net'
+).replace(/\/+$/, ''); // strip trailing slashes to prevent double-slash URLs
 
 const TIMEOUT = 15000;
 
