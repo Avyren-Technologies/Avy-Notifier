@@ -73,6 +73,32 @@ export function clearAuthData(): void {
   localStorage.removeItem(USER_KEY);
 }
 
+// ─── Auth state callback (set by AuthContext) ──────────────────────────────
+
+type AuthStateCallback = (user: unknown) => void;
+type LogoutCallback = () => void;
+
+let _onTokenRefreshed: AuthStateCallback | null = null;
+let _onAuthFailure: LogoutCallback | null = null;
+
+/**
+ * Called by AuthContext on mount to wire up the interceptor
+ * to the React auth state. This allows the module-level interceptor
+ * to update the React context after a successful token refresh.
+ */
+export function registerAuthCallbacks(
+  onTokenRefreshed: AuthStateCallback,
+  onAuthFailure: LogoutCallback,
+) {
+  _onTokenRefreshed = onTokenRefreshed;
+  _onAuthFailure = onAuthFailure;
+}
+
+export function unregisterAuthCallbacks() {
+  _onTokenRefreshed = null;
+  _onAuthFailure = null;
+}
+
 // ─── Axios instance ─────────────────────────────────────────────────────────
 
 export const apiClient = axios.create({
@@ -163,40 +189,64 @@ apiClient.interceptors.response.use(
     const refreshToken = getRefreshToken();
     if (!refreshToken) {
       isRefreshing = false;
-      clearAuthData();
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+      processQueue(new Error('No refresh token'), null);
+      // Use the auth callback to trigger proper logout through React context
+      if (_onAuthFailure) {
+        _onAuthFailure();
+      } else {
+        clearAuthData();
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
       }
       return Promise.reject(error);
     }
 
     try {
+      // Use a fresh axios instance (not apiClient) to avoid interceptor loops
       const { data } = await axios.post(`${BASE_URL}/api/auth/refresh`, {
         refreshToken,
       });
 
       const newToken: string = data.token;
       const newRefreshToken: string | undefined = data.refreshToken;
+      const user = data.user;
 
+      // Update localStorage
       setAuthToken(newToken);
       if (newRefreshToken) {
         setRefreshToken(newRefreshToken);
+      } else {
+        // Keep the old refresh token if the server didn't send a new one
+        // (matches mobile behavior: newRefreshToken || refreshToken)
       }
-      if (data.user) {
-        setStoredUser(JSON.stringify(data.user));
+      if (user) {
+        setStoredUser(JSON.stringify(user));
+      }
+
+      // Notify the React auth context so it updates its state
+      if (_onTokenRefreshed && user) {
+        _onTokenRefreshed(user);
       }
 
       processQueue(null, newToken);
 
+      // Retry the original request with the new token
       if (originalRequest.headers) {
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
       }
       return apiClient(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError, null);
-      clearAuthData();
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+
+      // Use the auth callback to trigger proper logout through React context
+      if (_onAuthFailure) {
+        _onAuthFailure();
+      } else {
+        clearAuthData();
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
       }
       return Promise.reject(refreshError);
     } finally {

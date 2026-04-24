@@ -8,6 +8,7 @@ import { cn } from '../../lib/utils';
 const ROUTE_LABELS: Record<string, string> = {
   '/dashboard/operator': 'Furnace Dashboard',
   '/dashboard/meter-readings': 'Meter Readings',
+  '/dashboard/meter-history': 'Meter History',
   '/dashboard/analytics': 'Analytics',
   '/dashboard/alarms': 'Alarm History',
   '/dashboard/reports': 'Reports',

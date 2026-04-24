@@ -129,6 +129,7 @@ export const useActiveAlarms = (initialForceRefresh = false) => {
       authState.isAuthenticated && !!authState.user?.organizationId,
     refetchInterval: 30000,
     staleTime: 25000,
+    placeholderData: (prev: ScadaAlarmResponse | undefined) => prev,
     retry: 3,
     retryDelay: (attemptIndex) =>
       Math.min(1000 * 2 ** attemptIndex, 30000),
@@ -281,6 +282,7 @@ export const useAnalyticsData = (timeFilter: string) => {
     refetchInterval: 5000,
     staleTime: 500,
     gcTime: 30000,
+    placeholderData: (prev: unknown) => prev,
     retry: 3,
     retryDelay: (attemptIndex) =>
       Math.min(1000 * 2 ** attemptIndex, 10000),

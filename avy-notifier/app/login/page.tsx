@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/auth-context';
 import { Button } from '../components/ui/button';
@@ -269,9 +270,14 @@ export default function LoginPage() {
         <div className="relative z-10 flex flex-col items-center px-12 text-center">
           {/* Logo */}
           <div className="mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-white/15 shadow-2xl shadow-black/20 ring-1 ring-white/20 backdrop-blur-sm">
-            <span className="text-3xl font-extrabold tracking-tight text-white">
-              AV
-            </span>
+            <Image
+              src="/Avy-Logo.png"
+              alt="Avy Notifier logo"
+              width={72}
+              height={72}
+              className="h-[72px] w-[72px] rounded-xl object-cover"
+              priority
+            />
           </div>
 
           <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-white">
@@ -311,7 +317,14 @@ export default function LoginPage() {
           {/* Mobile branding (visible on smaller screens) */}
           <div className="mb-10 flex flex-col items-center lg:hidden">
             <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-[hsl(var(--info))] to-primary shadow-lg shadow-primary/25">
-              <span className="text-2xl font-extrabold text-white">AV</span>
+              <Image
+                src="/Avy-Logo.png"
+                alt="Avy Notifier logo"
+                width={56}
+                height={56}
+                className="h-14 w-14 rounded-xl object-cover"
+                priority
+              />
             </div>
             <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
               Avy Notifier

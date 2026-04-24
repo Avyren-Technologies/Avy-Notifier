@@ -36,7 +36,9 @@ export const useLatestMeterReading = () => {
       const { data } = await apiClient.get('/api/meter/latest');
       return data.data ?? null;
     },
-    staleTime: 1000 * 60 * 3, // 3 minutes
+    staleTime: 25000,
+    refetchInterval: 30000,
+    placeholderData: (prev: MeterReading | null | undefined) => prev,
     enabled,
     retry: 1,
     retryDelay: 1000,
@@ -65,7 +67,9 @@ export const useMeterHistory = (hours: number = 1, startTime?: string) => {
       );
       return data.data;
     },
-    staleTime: 1000 * 60 * 3, // 3 minutes
+    staleTime: 25000,
+    refetchInterval: 30000,
+    placeholderData: (prev: PaginatedMeterReadings | undefined) => prev,
     enabled,
     retry: 1,
     retryDelay: 1000,

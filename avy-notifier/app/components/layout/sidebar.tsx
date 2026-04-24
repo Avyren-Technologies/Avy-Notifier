@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -19,6 +20,7 @@ import {
   Building2,
   PanelLeftClose,
   PanelLeft,
+  History,
 } from 'lucide-react';
 import { useAuth } from '../../context/auth-context';
 import { cn } from '../../lib/utils';
@@ -58,6 +60,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Furnace Dashboard', href: '/dashboard/operator', icon: Flame },
       { label: 'Meter Dashboard', href: '/dashboard/meter-readings', icon: Zap },
+      { label: 'Meter History', href: '/dashboard/meter-history', icon: History },
     ],
   },
   {
@@ -128,13 +131,15 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         {/* ── Logo ──────────────────────────────────────────────── */}
         <div className="flex h-16 shrink-0 items-center gap-3 border-b border-border px-4">
           {/* Logo mark */}
-          <div
-            className={cn(
-              'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
-              'bg-gradient-to-br from-primary to-info shadow-md shadow-primary/20'
-            )}
-          >
-            <span className="text-sm font-extrabold text-white tracking-tight">AV</span>
+          <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg">
+            <Image
+              src="/Avy-Logo.png"
+              alt="Avy Notifier logo"
+              fill
+              sizes="36px"
+              className="object-cover"
+              priority
+            />
           </div>
 
           <AnimatePresence initial={false}>

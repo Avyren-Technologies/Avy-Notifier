@@ -486,14 +486,7 @@ export default function MeterReadingsPage() {
     refetch: refetchLimits,
   } = useMeterLimits();
 
-  // ── Auto-refresh every 3 minutes ──────────────────────────────
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refetchLatest();
-      refetchHistory();
-    }, 3 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [refetchLatest, refetchHistory]);
+  // Auto-refresh is handled by React Query's refetchInterval (30s) in the hooks
 
   // ── Derived: previous reading for trends ──────────────────────
   const previousReading = useMemo(() => {

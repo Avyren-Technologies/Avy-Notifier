@@ -1,5 +1,28 @@
-node_modules/
+# deps
+node_modules
+**/node_modules
 
-cursorUpdates/
+# backend + web dashboard (not needed for Expo native build)
+backend
+avy-notifier
 
-backend/
+# iOS local native artifacts (huge)
+ios/Pods
+ios/build
+
+# Android local artifacts (if present)
+android/.gradle
+android/app/build
+android/build
+
+# caches/logs
+.expo
+.expo-shared
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# vcs/ide
+.git
+.cursor

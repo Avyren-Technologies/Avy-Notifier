@@ -20,7 +20,8 @@ import {
   setStoredUser,
   clearAuthData,
   setOrganizationId,
-  apiClient,
+  registerAuthCallbacks,
+  unregisterAuthCallbacks,
 } from '../lib/api-client';
 
 // ─── Storage keys ──────────────────────────────────────────────────────────────
@@ -137,6 +138,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     loadSession();
   }, []);
+
+  // ── Register interceptor callbacks ────────────────────────────────────────
+  // Wire the axios response interceptor to this React context so that
+  // token refreshes update the auth state and failures trigger logout.
+
+  useEffect(() => {
+    registerAuthCallbacks(
+      // onTokenRefreshed — update React state with refreshed user data
+      (user: unknown) => {
+        const typedUser = user as User;
+        setAuthState((prev) => ({
+          ...prev,
+          user: typedUser,
+          isAuthenticated: true,
+          error: null,
+          errorType: 'error',
+        }));
+      },
+      // onAuthFailure — perform full logout through the React context
+      () => {
+        queryClient.clear();
+        clearAuthData();
+        removeLocal('organizationId');
+        removeLocal('role');
+
+        setAuthState({
+          user: null,
+          isLoading: false,
+          isAuthenticated: false,
+          error: 'Session expired. Please log in again.',
+          errorType: 'error',
+          organizationId: null,
+          role: null,
+        });
+
+        router.replace('/login');
+      },
+    );
+
+    return () => {
+      unregisterAuthCallbacks();
+    };
+  }, [queryClient, router]);
 
   // ── Route protection ───────────────────────────────────────────────────────
 

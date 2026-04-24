@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   title: 'Avy Notifier | SCADA Monitoring Dashboard',
   description:
     'Industrial SCADA monitoring dashboard for furnace and meter operations',
+  icons: {
+    icon: '/Avy-Logo.png',
+    apple: '/Avy-Logo.png',
+    shortcut: '/Avy-Logo.png',
+  },
 };
 
 export default function RootLayout({
