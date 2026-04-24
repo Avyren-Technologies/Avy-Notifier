@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { format as formatDate } from 'date-fns';
 import { apiClient } from '../lib/api-client';
 import { useAuth } from '../context/auth-context';
+import * as XLSX from 'xlsx';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -42,11 +42,11 @@ export interface FurnaceReport {
 interface PaginatedReportsResponse {
   reports: FurnaceReport[];
   pagination: {
-    page: number;
-    limit: number;
-    total: number;
+    currentPage: number;
+    totalCount: number;
     totalPages: number;
     hasNextPage: boolean;
+    hasPrevPage: boolean;
   };
 }
 
@@ -223,18 +223,60 @@ export function useFurnaceReports() {
           );
         }
 
-        // Save report to database via server-side generation
+        // Generate Excel file client-side
         const sanitizedTitle = reportTitle.replace(/\s+/g, '_');
         const timestamp = new Date()
           .toISOString()
           .replace(/[:.-]/g, '_');
         const fileName = `${sanitizedTitle}_${timestamp}.xlsx`;
 
+        // Build Excel workbook from alarm data
+        const wb = XLSX.utils.book_new();
+        const wsData = result.data.map((row: Record<string, unknown>) => {
+          const entry: Record<string, unknown> = {
+            Timestamp: row.created_timestamp,
+            ID: row.id,
+          };
+          if (includeThresholds) {
+            // Add threshold columns if requested
+            Object.keys(row).forEach((key) => {
+              if (!['created_timestamp', 'id'].includes(key)) {
+                entry[key] = row[key];
+              }
+            });
+          } else {
+            Object.keys(row).forEach((key) => {
+              if (
+                !['created_timestamp', 'id'].includes(key) &&
+                !key.endsWith('_ht') &&
+                !key.endsWith('_lt')
+              ) {
+                entry[key] = row[key];
+              }
+            });
+          }
+          return entry;
+        });
+        const ws = XLSX.utils.json_to_sheet(wsData);
+        XLSX.utils.book_append_sheet(wb, ws, 'Alarm Data');
+
+        // Convert workbook to binary string, then to base64
+        const wbOut = XLSX.write(wb, { bookType: 'xlsx', type: 'base64' });
+        const fileSize = Math.ceil((wbOut.length * 3) / 4); // approximate decoded size
+
+        // Also trigger a browser download
+        const binaryStr = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([binaryStr], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+        triggerBrowserDownload(blob, fileName);
+
         const savePayload = {
           title: reportTitle,
           format,
+          fileContent: wbOut,
           fileName,
-          fileSize: 0,
+          fileSize,
           startDate: startDate.toISOString(),
           endDate: endDate.toISOString(),
           grouping: grouping.toString(),

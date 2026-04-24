@@ -4,15 +4,77 @@ import { authenticate } from '../middleware/authMiddleware';
 import { getRequestOrgId } from '../middleware/authMiddleware';
 import prisma from '../config/db';
 import { getFirstString } from '../utils/requestValue';
+import { getOrganizationSchemaConfig } from '../services/scadaService';
 
 const router: Router = express.Router();
+
+type Severity = 'critical' | 'warning' | 'info';
+
+type ColumnConfigEntry = {
+  name?: string;
+  type?: string;
+  zone?: string;
+  unit?: string;
+  isAnalog?: boolean;
+  isBinary?: boolean;
+  lowDeviation?: number;
+  highDeviation?: number;
+};
+
+const normalizeQueryList = (value: unknown): string[] => {
+  if (!value) return [];
+  if (Array.isArray(value)) {
+    return value
+      .flatMap(v => String(v).split(','))
+      .map(v => v.trim().toLowerCase())
+      .filter(Boolean);
+  }
+  return String(value)
+    .split(',')
+    .map(v => v.trim().toLowerCase())
+    .filter(Boolean);
+};
+
+const calculateAnalogSeverity = (
+  value: number,
+  setpoint: number,
+  lowDeviation: number,
+  highDeviation: number
+): Severity => {
+  const lowLimit = setpoint + lowDeviation;
+  const highLimit = setpoint + highDeviation;
+  const warningOffset = 10;
+
+  if (value < lowLimit - warningOffset || value > highLimit + warningOffset) {
+    return 'critical';
+  }
+  if (value < lowLimit || value > highLimit) {
+    return 'warning';
+  }
+  return 'info';
+};
+
+const getDefaultDeviation = (type: string, isHigh = false): number => {
+  switch (type.toLowerCase()) {
+    case 'carbon':
+      return isHigh ? 1 : -1;
+    case 'temperature':
+      return isHigh ? 10 : -10;
+    case 'level':
+      return isHigh ? 8 : -8;
+    case 'pressure':
+      return isHigh ? 5 : -5;
+    default:
+      return isHigh ? 10 : -10;
+  }
+};
 
 // Apply authentication to all report routes
 router.use(authenticate);
 
 /**
  * @route   GET /api/reports/alarm-data
- * @desc    Get alarm data from jk2 table with filters
+ * @desc    Get alarm data from configured SCADA table with filters
  * @access  Private
  */
 router.get('/alarm-data', function(req: Request, res: Response) {
@@ -21,9 +83,9 @@ router.get('/alarm-data', function(req: Request, res: Response) {
       const { 
         startDate, 
         endDate, 
-        alarmTypes = [], 
-        severityLevels = [], 
-        zones = [] 
+        alarmTypes,
+        severityLevels,
+        zones
       } = req.query;
 
       // Validate date inputs
@@ -38,10 +100,17 @@ router.get('/alarm-data', function(req: Request, res: Response) {
       const client = await getClientWithRetry(getRequestOrgId(req));
 
       try {
-        // Get setpoints to calculate thresholds
-        const setpoints = await prisma.setpoint.findMany();
+        const orgId = getRequestOrgId(req);
+        const schemaConfig = await getOrganizationSchemaConfig(orgId);
+        const normalizedAlarmTypes = normalizeQueryList(alarmTypes);
+        const normalizedSeverityLevels = normalizeQueryList(severityLevels);
+        const normalizedZones = normalizeQueryList(zones);
+
+        // Build setpoint map for dynamic analog severity evaluation
+        const setpoints = await prisma.setpoint.findMany({
+          where: { organizationId: orgId }
+        });
         const setpointMap = new Map<string, { lowDeviation: number; highDeviation: number }>();
-        
         setpoints.forEach(sp => {
           setpointMap.set(sp.scadaField, {
             lowDeviation: sp.lowDeviation,
@@ -49,201 +118,130 @@ router.get('/alarm-data', function(req: Request, res: Response) {
           });
         });
 
-        // Build the query to fetch all required fields
+        const sanitizeIdentifier = (value: string): string => {
+          if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(value)) {
+            throw new Error(`Invalid SQL identifier: ${value}`);
+          }
+          return `"${value}"`;
+        };
+
+        const configuredColumns = Array.isArray(schemaConfig.columns) ? schemaConfig.columns : [];
+        const columns = [...new Set([...configuredColumns, 'id', 'created_timestamp'])];
+        const safeColumnList = columns.map(sanitizeIdentifier).join(', ');
+        const safeTable = sanitizeIdentifier(schemaConfig.table || 'jk2');
+
         let query = `
-          SELECT 
-            id, 
-            created_timestamp,
-            -- Analog values (first 11 fields)
-            hz1sv, hz1pv,
-            hz2sv, hz2pv,
-            cpsv, cppv,
-            tz1sv, tz1pv,
-            tz2sv, tz2pv,
-            oilpv,
-            -- Binary status fields (fields 12-18+)
-            oiltemphigh, oillevelhigh, oillevellow,
-            hz1hfail, hz2hfail,
-            hardconfail, hardcontraip,
-            oilconfail, oilcontraip,
-            hz1fanfail, hz2fanfail,
-            hz1fantrip, hz2fantrip,
-            tempconfail, tempcontraip,
-            tz1fanfail, tz2fanfail,
-            tz1fantrip, tz2fantrip
-          FROM jk2
+          SELECT ${safeColumnList}
+          FROM ${safeTable}
           WHERE created_timestamp BETWEEN $1 AND $2
         `;
 
-        const queryParams: (Date | number | string)[] = [parsedStartDate, parsedEndDate];
+        const queryParams: any[] = [parsedStartDate, parsedEndDate];
         let paramIndex = 3;
 
-        // Add alarm type filters if provided
-        if (alarmTypes && Array.isArray(alarmTypes) && alarmTypes.length > 0) {
-          const alarmTypeConditions = [];
-          
-          for (const type of alarmTypes) {
-            switch(type) {
-              case 'temperature':
-                alarmTypeConditions.push(`
-                  (hz1pv IS NOT NULL OR hz2pv IS NOT NULL OR 
-                   tz1pv IS NOT NULL OR tz2pv IS NOT NULL)
-                `);
-                break;
-              case 'carbon':
-                alarmTypeConditions.push(`cppv IS NOT NULL`);
-                break;
-              case 'oil':
-                alarmTypeConditions.push(`
-                  (oilpv IS NOT NULL OR oiltemphigh = true OR 
-                   oillevelhigh = true OR oillevellow = true)
-                `);
-                break;
-              case 'fan':
-                alarmTypeConditions.push(`
-                  (hz1fanfail = true OR hz2fanfail = true OR 
-                   tz1fanfail = true OR tz2fanfail = true OR
-                   hz1fantrip = true OR hz2fantrip = true OR
-                   tz1fantrip = true OR tz2fantrip = true)
-                `);
-                break;
-              case 'conveyor':
-                alarmTypeConditions.push(`
-                  (hardconfail = true OR hardcontraip = true OR 
-                   oilconfail = true OR oilcontraip = true OR
-                   tempconfail = true OR tempcontraip = true)
-                `);
-                break;
-            }
-          }
-          
-          if (alarmTypeConditions.length > 0) {
-            query += ` AND (${alarmTypeConditions.join(' OR ')})`;
-          }
-        }
-        
-        // Add zone filters if provided
-        if (zones && Array.isArray(zones) && zones.length > 0) {
-          const zoneConditions = [];
-          
-          for (const zone of zones) {
-            switch(zone) {
-              case 'zone1':
-                zoneConditions.push(`
-                  (hz1pv IS NOT NULL OR hz1sv IS NOT NULL OR 
-                   tz1pv IS NOT NULL OR tz1sv IS NOT NULL OR
-                   hz1fanfail = true OR hz1fantrip = true OR
-                   tz1fanfail = true OR tz1fantrip = true)
-                `);
-                break;
-              case 'zone2':
-                zoneConditions.push(`
-                  (hz2pv IS NOT NULL OR hz2sv IS NOT NULL OR 
-                   tz2pv IS NOT NULL OR tz2sv IS NOT NULL OR
-                   hz2fanfail = true OR hz2fantrip = true OR
-                   tz2fanfail = true OR tz2fantrip = true)
-                `);
-                break;
-            }
-          }
-          
-          if (zoneConditions.length > 0) {
-            query += ` AND (${zoneConditions.join(' OR ')})`;
+        // Optional generic search on configured columns
+        if (req.query.search && typeof req.query.search === 'string' && req.query.search.trim()) {
+          const searchValue = req.query.search.trim().toLowerCase();
+          const searchableColumns = columns.filter(
+            col => col !== 'id' && col !== 'created_timestamp'
+          );
+          if (searchableColumns.length > 0) {
+            const searchConditions = searchableColumns
+              .map(col => `LOWER(CAST(${sanitizeIdentifier(col)} AS TEXT)) LIKE $${paramIndex}`)
+              .join(' OR ');
+            query += ` AND (${searchConditions})`;
+            searchableColumns.forEach(() => queryParams.push(`%${searchValue}%`));
+            paramIndex += searchableColumns.length;
           }
         }
 
-        // Add severity filters (we'll determine severity based on thresholds for analog values)
-        if (severityLevels && Array.isArray(severityLevels) && severityLevels.length > 0) {
-          const severityConditions = [];
-          
-          for (const severity of severityLevels) {
-            switch(severity) {
-              case 'critical':
-                severityConditions.push(`
-                  (hz1pv > hz1ht OR hz1pv < hz1lt OR
-                   hz2pv > hz2ht OR hz2pv < hz2lt OR
-                   tz1pv > tz1ht OR tz1pv < tz1lt OR
-                   tz2pv > tz2ht OR tz2pv < tz2lt OR
-                   cppv > cph OR cppv < cpl OR
-                   oiltemphigh = true OR
-                   hardconfail = true OR oilconfail = true OR tempconfail = true OR
-                   hz1fanfail = true OR hz2fanfail = true OR
-                   tz1fanfail = true OR tz2fanfail = true)
-                `);
-                break;
-              case 'warning':
-                // For warning, use thresholds closer to setpoints
-                severityConditions.push(`
-                  ((hz1pv > (hz1sv + (hz1ht - hz1sv) * 0.5) AND hz1pv <= hz1ht) OR
-                   (hz1pv < (hz1sv - (hz1sv - hz1lt) * 0.5) AND hz1pv >= hz1lt) OR
-                   (hz2pv > (hz2sv + (hz2ht - hz2sv) * 0.5) AND hz2pv <= hz2ht) OR
-                   (hz2pv < (hz2sv - (hz2sv - hz2lt) * 0.5) AND hz2pv >= hz2lt) OR
-                   (tz1pv > (tz1sv + (tz1ht - tz1sv) * 0.5) AND tz1pv <= tz1ht) OR
-                   (tz1pv < (tz1sv - (tz1sv - tz1lt) * 0.5) AND tz1pv >= tz1lt) OR
-                   (tz2pv > (tz2sv + (tz2ht - tz2sv) * 0.5) AND tz2pv <= tz2ht) OR
-                   (tz2pv < (tz2sv - (tz2sv - tz2lt) * 0.5) AND tz2pv >= tz2lt) OR
-                   (cppv > (cpsv + (cph - cpsv) * 0.5) AND cppv <= cph) OR
-                   (cppv < (cpsv - (cpsv - cpl) * 0.5) AND cppv >= cpl) OR
-                   oillevelhigh = true OR oillevellow = true OR
-                   hardcontraip = true OR oilcontraip = true OR tempcontraip = true OR
-                   hz1fantrip = true OR hz2fantrip = true OR
-                   tz1fantrip = true OR tz2fantrip = true)
-                `);
-                break;
-            }
-          }
-          
-          if (severityConditions.length > 0) {
-            query += ` AND (${severityConditions.join(' OR ')})`;
-          }
-        }
-        
-        // Order by timestamp
+        // Keep compatibility: if filter arrays are sent, do not fail. We ignore legacy fixed-column filters
+        // because this route now supports dynamic SCADA schemas.
+        void alarmTypes;
+        void severityLevels;
+        void zones;
+
         query += ' ORDER BY created_timestamp DESC';
-        
-        // Add limit if needed
+
         const limit = req.query.limit ? parseInt(getFirstString(req.query.limit) || '1000', 10) : 1000;
         if (!isNaN(limit) && limit > 0) {
           query += ` LIMIT $${paramIndex}`;
           queryParams.push(limit);
         }
-        
-        // Execute the query
+
         const result = await client.query(query, queryParams);
-        
-        // Add calculated threshold values to each row
-        const enrichedData = result.rows.map(row => {
-          const enrichedRow = { ...row };
-          
-          // Calculate thresholds for analog values based on setpoints
-          const addThresholds = (setValueField: string, presentValueField: string) => {
-            const setpoint = setpointMap.get(setValueField);
-            if (setpoint && row[setValueField] !== null && row[setValueField] !== undefined) {
-              const setValue = row[setValueField];
-              enrichedRow[`${presentValueField.replace('pv', 'ht')}`] = setValue + setpoint.highDeviation;
-              enrichedRow[`${presentValueField.replace('pv', 'lt')}`] = setValue + setpoint.lowDeviation;
+
+        const columnConfigs = (schemaConfig.columnConfigs || {}) as Record<string, ColumnConfigEntry>;
+
+        const filteredRows = result.rows.filter(row => {
+          const rowSignals: { type: string; zone?: string; severity: Severity; active: boolean }[] = [];
+
+          for (const [columnName, cfg] of Object.entries(columnConfigs)) {
+            const type = (cfg.type || '').toLowerCase();
+            const zone = cfg.zone?.toLowerCase();
+
+            if (cfg.isBinary) {
+              const raw = row[columnName];
+              const active = raw === true || raw === 1 || raw === '1' || raw === 'true';
+              rowSignals.push({
+                type,
+                zone,
+                severity: active ? 'critical' : 'info',
+                active
+              });
+              continue;
             }
-          };
-          
-          // Add thresholds for each analog field
-          addThresholds('hz1sv', 'hz1pv');
-          addThresholds('hz2sv', 'hz2pv');
-          const cpSetpoint = setpointMap.get('cpsv');
-          if (cpSetpoint && row.cpsv !== null && row.cpsv !== undefined) {
-            const cpSetValue = row.cpsv;
-            enrichedRow['cph'] = cpSetValue + cpSetpoint.highDeviation;
-            enrichedRow['cpl'] = cpSetValue + cpSetpoint.lowDeviation;
+
+            if (cfg.isAnalog) {
+              const pvValue = Number(row[columnName]);
+              if (!Number.isFinite(pvValue)) continue;
+
+              let svField = '';
+              if (columnName.endsWith('_pv')) {
+                svField = columnName.replace(/_pv$/, '_sv');
+              } else if (columnName.endsWith('pv')) {
+                svField = columnName.replace(/pv$/, 'sv');
+              }
+
+              const svRaw = svField ? row[svField] : undefined;
+              const svValue = Number.isFinite(Number(svRaw)) ? Number(svRaw) : pvValue;
+
+              const sp = setpointMap.get(columnName);
+              const lowDeviation = sp?.lowDeviation ?? cfg.lowDeviation ?? getDefaultDeviation(type, false);
+              const highDeviation = sp?.highDeviation ?? cfg.highDeviation ?? getDefaultDeviation(type, true);
+              const severity = calculateAnalogSeverity(pvValue, svValue, lowDeviation, highDeviation);
+
+              rowSignals.push({
+                type,
+                zone,
+                severity,
+                active: severity !== 'info'
+              });
+            }
           }
-          addThresholds('tz1sv', 'tz1pv');
-          addThresholds('tz2sv', 'tz2pv');
-          addThresholds('oilpv', 'oilpv'); // Special case for oil temperature
-          
-          return enrichedRow;
+
+          // If no dynamic config present for this row, keep backward compatibility and include row.
+          if (rowSignals.length === 0) {
+            return true;
+          }
+
+          return rowSignals.some(signal => {
+            if (normalizedAlarmTypes.length > 0 && !normalizedAlarmTypes.includes(signal.type)) {
+              return false;
+            }
+            if (normalizedZones.length > 0 && (!signal.zone || !normalizedZones.includes(signal.zone))) {
+              return false;
+            }
+            if (normalizedSeverityLevels.length > 0 && !normalizedSeverityLevels.includes(signal.severity)) {
+              return false;
+            }
+            return true;
+          });
         });
-        
+
         return res.json({
-          count: enrichedData.length,
-          data: enrichedData
+          count: filteredRows.length,
+          data: filteredRows
         });
       } finally {
         client.release();

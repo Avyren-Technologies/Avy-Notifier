@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../context/auth-context';
+import type { User } from '../../types/auth';
 import { useTheme } from '../../context/theme-context';
 import { useMaintenance } from '../../context/maintenance-context';
 import { apiClient } from '../../lib/api-client';
@@ -28,15 +29,7 @@ import { TimeRangePicker } from '../../components/time-range-picker';
 
 interface ProfileResponse {
   message: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    avatar?: string;
-    createdAt: string;
-    updatedAt: string;
-  };
+  user: User;
 }
 
 // ─── Page ───────────────────────────────────────────────────────────────────
@@ -322,21 +315,36 @@ export default function ProfilePage() {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
 
+      // Validate file size (max 2MB to match backend limit)
+      const MAX_SIZE = 2 * 1024 * 1024;
+      if (file.size > MAX_SIZE) {
+        const { toast } = await import('sonner');
+        toast.error('Image too large. Maximum size is 2MB.');
+        return;
+      }
+
       setAvatarUploading(true);
       setAvatarMenuOpen(false);
 
       try {
         const reader = new FileReader();
         reader.onloadend = async () => {
-          const base64 = reader.result as string;
-          const response = await apiClient.put<ProfileResponse>('/api/auth/profile', {
-            avatar: base64,
-          });
-          if (response.data.user) {
-            updateUser(response.data.user);
-            queryClient.invalidateQueries({ queryKey: ['profile'] });
+          try {
+            const base64 = reader.result as string;
+            const response = await apiClient.put<ProfileResponse>('/api/auth/profile', {
+              avatar: base64,
+            });
+            if (response.data.user) {
+              updateUser(response.data.user);
+              queryClient.invalidateQueries({ queryKey: ['profile'] });
+            }
+          } catch (err) {
+            const { toast } = await import('sonner');
+            toast.error('Failed to upload avatar. Please try again.');
+            console.error('Avatar upload error:', err);
+          } finally {
+            setAvatarUploading(false);
           }
-          setAvatarUploading(false);
         };
         reader.readAsDataURL(file);
       } catch {

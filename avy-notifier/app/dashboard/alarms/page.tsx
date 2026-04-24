@@ -27,6 +27,7 @@ import {
 } from '../../components/ui/select';
 import { AlarmCard } from '../../components/alarm-card';
 import { AlarmDetailsModal } from '../../components/alarm-details-modal';
+import { ResolutionModal } from '../../components/resolution-modal';
 import {
   useAlarmHistory,
   useAlarmConfigurations,
@@ -420,18 +421,33 @@ export default function AlarmHistoryPage() {
     );
   }, [selectedAlarm, updateStatus, refetch, handleCloseDetails]);
 
-  const handleResolve = useCallback(() => {
-    if (!selectedAlarm) return;
-    updateStatus.mutate(
-      { id: selectedAlarm.id, status: 'resolved' as AlarmStatus },
-      {
-        onSuccess: () => {
-          refetch();
-          handleCloseDetails();
+  const [resolutionOpen, setResolutionOpen] = useState(false);
+
+  const handleResolveClick = useCallback(() => {
+    setDetailsOpen(false);
+    setResolutionOpen(true);
+  }, []);
+
+  const handleResolveSubmit = useCallback(
+    (message: string) => {
+      if (!selectedAlarm) return;
+      updateStatus.mutate(
+        {
+          id: selectedAlarm.id,
+          status: 'resolved' as AlarmStatus,
+          resolutionMessage: message,
         },
-      }
-    );
-  }, [selectedAlarm, updateStatus, refetch, handleCloseDetails]);
+        {
+          onSuccess: () => {
+            refetch();
+            setResolutionOpen(false);
+            setSelectedAlarm(null);
+          },
+        },
+      );
+    },
+    [selectedAlarm, updateStatus, refetch],
+  );
 
   const handleRefresh = useCallback(() => {
     refetch();
@@ -699,8 +715,19 @@ export default function AlarmHistoryPage() {
           selectedAlarm?.status === 'active' ? handleAcknowledge : undefined
         }
         onResolve={
-          selectedAlarm?.status !== 'resolved' ? handleResolve : undefined
+          selectedAlarm?.status !== 'resolved' ? handleResolveClick : undefined
         }
+      />
+
+      {/* ── Resolution Modal ───────────────────────────────────────── */}
+      <ResolutionModal
+        open={resolutionOpen}
+        onClose={() => {
+          setResolutionOpen(false);
+          setSelectedAlarm(null);
+        }}
+        onSubmit={handleResolveSubmit}
+        alarmDescription={selectedAlarm?.description || ''}
       />
     </div>
   );

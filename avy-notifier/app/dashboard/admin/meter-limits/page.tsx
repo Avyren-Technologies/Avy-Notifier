@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../context/auth-context';
 import { useMeterLimits, useUpdateMeterLimit } from '../../../hooks/use-meter-readings';
@@ -47,10 +47,11 @@ export default function MeterLimitsPage() {
   const [editErrors, setEditErrors] = useState<{ high?: string; low?: string }>({});
 
   // ── Guard: admin-only ──────────────────────────────────────────────────
-  if (!authState.isLoading && !isAdmin) {
-    router.replace('/dashboard');
-    return null;
-  }
+  useEffect(() => {
+    if (!authState.isLoading && !isAdmin) {
+      router.replace('/dashboard');
+    }
+  }, [authState.isLoading, isAdmin, router]);
 
   // ── Group limits ──────────────────────────────────────────────────────
   const electricalParams =

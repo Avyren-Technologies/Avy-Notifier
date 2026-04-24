@@ -27,7 +27,6 @@ export default function LoginPage() {
   // Form state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Validation state
@@ -386,40 +385,6 @@ export default function LoginPage() {
                   {passwordError}
                 </p>
               )}
-            </div>
-
-            {/* Remember me */}
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                role="checkbox"
-                aria-checked={rememberMe}
-                onClick={() => setRememberMe((v) => !v)}
-                className={cn(
-                  'flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded border transition-colors duration-150',
-                  'h-[18px] w-[18px]',
-                  rememberMe
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-input bg-background hover:border-primary/60'
-                )}
-              >
-                {rememberMe && (
-                  <svg
-                    className="h-3 w-3"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                )}
-              </button>
-              <span className="text-sm text-muted-foreground select-none">
-                Remember me
-              </span>
             </div>
 
             {/* Submit */}

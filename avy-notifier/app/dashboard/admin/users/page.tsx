@@ -87,7 +87,9 @@ export default function AdminUsersPage() {
       const { data } = await apiClient.get<User[]>('/api/admin/users');
       return data;
     },
-    enabled: authState.isAuthenticated && authState.user?.role === 'ADMIN',
+    enabled:
+      authState.isAuthenticated &&
+      (authState.user?.role === 'ADMIN' || authState.user?.role === 'SUPER_ADMIN'),
   });
 
   // ── Create user mutation ────────────────────────────────────────────────

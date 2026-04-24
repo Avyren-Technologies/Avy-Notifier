@@ -148,8 +148,8 @@ export const useUpdateAlarmStatus = () => {
       status,
       resolutionMessage,
     }: UpdateAlarmStatusParams) => {
-      await apiClient.put(`/api/alarms/${id}/status`, {
-        status,
+      await apiClient.patch(`/api/alarms/${id}/status`, {
+        status: status.toUpperCase(),
         resolutionMessage,
       });
       updateStoreAlarmStatus(id, status);

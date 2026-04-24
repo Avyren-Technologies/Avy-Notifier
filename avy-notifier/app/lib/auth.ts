@@ -40,16 +40,16 @@ export async function refreshTokenApi(
 
 /** Fetch the currently authenticated user's profile. */
 export async function fetchProfile(): Promise<User> {
-  const { data } = await apiClient.get<User>('/api/auth/profile');
-  return data;
+  const { data } = await apiClient.get<{ message: string; user: User }>('/api/auth/profile');
+  return data.user;
 }
 
 /** Update the currently authenticated user's profile. */
 export async function updateProfile(
   profileData: Partial<Pick<User, 'name' | 'email' | 'avatar'>>,
 ): Promise<User> {
-  const { data } = await apiClient.put<User>('/api/auth/profile', profileData);
-  return data;
+  const { data } = await apiClient.put<{ message: string; user: User }>('/api/auth/profile', profileData);
+  return data.user;
 }
 
 /** Change the currently authenticated user's password. */
@@ -65,8 +65,8 @@ export async function changePassword(passwordData: {
 }
 
 /** Delete the currently authenticated user's avatar. */
-export async function deleteAvatar(): Promise<{ message: string }> {
-  const { data } = await apiClient.delete<{ message: string }>(
+export async function deleteAvatar(): Promise<{ message: string; user: User }> {
+  const { data } = await apiClient.delete<{ message: string; user: User }>(
     '/api/auth/avatar',
   );
   return data;

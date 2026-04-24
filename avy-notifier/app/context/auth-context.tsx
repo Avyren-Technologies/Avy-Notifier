@@ -171,10 +171,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     try {
       const response = await loginApi(credentials);
-      const { user, token } = response;
-      // The server may return a refreshToken alongside token/user
-      const refreshToken = (response as unknown as { refreshToken?: string })
-        .refreshToken;
+      const { user, token, refreshToken } = response;
 
       const organizationId = user?.organizationId || null;
       const role = user?.role || null;
@@ -229,10 +226,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 'Please check your login details and try again';
               break;
             case 401:
-              errorMessage =
-                serverMsg === 'Invalid credentials'
-                  ? 'Your email or password is incorrect. Please try again.'
-                  : 'Authentication failed. Please check your credentials.';
+              errorMessage = serverMsg || 'Your email or password is incorrect. Please try again.';
               break;
             case 403:
               if (serverMsg?.includes('organization is currently disabled')) {

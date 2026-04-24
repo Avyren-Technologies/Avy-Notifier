@@ -145,8 +145,26 @@ export const useDeleteNotification = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [NOTIFICATIONS_KEY] });
       queryClient.invalidateQueries({ queryKey: [UNREAD_COUNT_KEY] });
-      queryClient.refetchQueries({ queryKey: [UNREAD_COUNT_KEY] });
     },
+  });
+};
+
+/**
+ * Hook for fetching notification settings.
+ */
+export const useNotificationSettings = (enabled = true) => {
+  const { authState } = useAuth();
+  const isSuperAdmin = authState.user?.role === 'SUPER_ADMIN';
+
+  return useQuery<NotificationSettings>({
+    queryKey: [SETTINGS_KEY],
+    queryFn: async () => {
+      const { data } = await apiClient.get<NotificationSettings>(
+        '/api/notifications/settings',
+      );
+      return data;
+    },
+    enabled: enabled && authState.isAuthenticated && !isSuperAdmin,
   });
 };
 

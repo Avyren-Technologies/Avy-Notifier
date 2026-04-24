@@ -4,7 +4,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: string;
+  role: UserRole;
   organizationId: string | null;
   avatar?: string;
   createdAt: string;
@@ -29,9 +29,11 @@ export interface LoginCredentials {
 export interface AuthResponse {
   user: User;
   token: string;
+  refreshToken?: string;
 }
 
 export interface RegisterData extends LoginCredentials {
   name: string;
   role: UserRole;
+  organizationId?: string;
 }

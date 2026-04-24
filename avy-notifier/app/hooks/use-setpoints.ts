@@ -40,12 +40,14 @@ export const SETPOINT_KEYS = {
  */
 export const useSetpoints = () => {
   const { authState } = useAuth();
-  const isAdmin = authState?.user?.role === 'ADMIN';
+  const isAdminOrSuper =
+    authState?.user?.role === 'ADMIN' ||
+    authState?.user?.role === 'SUPER_ADMIN';
 
   return useQuery<Setpoint[]>({
     queryKey: SETPOINT_KEYS.all,
     queryFn: async () => {
-      if (!isAdmin) {
+      if (!isAdminOrSuper) {
         return [];
       }
 
@@ -55,21 +57,23 @@ export const useSetpoints = () => {
       return data;
     },
     staleTime: 30000, // 30 seconds
-    enabled: isAdmin,
+    enabled: isAdminOrSuper,
   });
 };
 
 /**
- * Hook for updating setpoint deviations (admin only).
+ * Hook for updating setpoint deviations (admin / super admin).
  */
 export const useUpdateSetpoint = () => {
   const queryClient = useQueryClient();
   const { authState } = useAuth();
-  const isAdmin = authState?.user?.role === 'ADMIN';
+  const isAdminOrSuper =
+    authState?.user?.role === 'ADMIN' ||
+    authState?.user?.role === 'SUPER_ADMIN';
 
   return useMutation<Setpoint, Error, UpdateSetpointParams>({
     mutationFn: async ({ id, lowDeviation, highDeviation }) => {
-      if (!isAdmin) {
+      if (!isAdminOrSuper) {
         throw new Error('Unauthorized: Only admins can update setpoints');
       }
 

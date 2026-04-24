@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { apiClient } from '../lib/api-client';
 import { cn } from '../lib/utils';
+import { useUnreadCount } from '../hooks/use-notifications';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -14,26 +13,7 @@ interface NotificationBadgeProps {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export function NotificationBadge({ size = 'md', className }: NotificationBadgeProps) {
-  const [count, setCount] = useState(0);
-
-  const fetchCount = useCallback(async () => {
-    try {
-      const { data } = await apiClient.get('/api/notifications/unread-count');
-      const total =
-        typeof data === 'number'
-          ? data
-          : data?.count ?? data?.pagination?.total ?? 0;
-      setCount(total);
-    } catch {
-      // Silently fail - badge simply won't update
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchCount();
-    const interval = setInterval(fetchCount, 60_000);
-    return () => clearInterval(interval);
-  }, [fetchCount]);
+  const { data: count = 0 } = useUnreadCount();
 
   if (count === 0) return null;
 

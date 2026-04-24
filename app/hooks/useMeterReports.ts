@@ -49,7 +49,7 @@ export function useMeterReports() {
     isError: isReportsError,
     refetch: refetchReports
   } = useQuery({
-    queryKey: ['meterReports'],
+    queryKey: ['meterReports', organizationId],
     queryFn: () => getMeterReports(organizationId ?? undefined),
     staleTime: 5 * 60 * 1000, // 5 minutes
     enabled,
@@ -62,7 +62,7 @@ export function useMeterReports() {
       // Save the generated report ID
       setGeneratedReportId(data.id);
       // Invalidate the reports query to refetch the list
-      queryClient.invalidateQueries({ queryKey: ['meterReports'] });
+      queryClient.invalidateQueries({ queryKey: ['meterReports', organizationId] });
     },
     onError: (error: any) => {
       console.error('Error in generate report mutation:', error);
@@ -227,12 +227,18 @@ export function useMeterReports() {
             }
           );
         } else {
-          // 4️⃣ iOS: hand off to the system via Linking
-          const supported = await Linking.canOpenURL(uri);
-          if (!supported) {
-            throw new Error('Cannot open this file on iOS');
+          // 4️⃣ iOS: use native share sheet to open/export local file.
+          // Linking.openURL(file://...) is often blocked on simulator with "Request is not trusted".
+          const canShare = await Sharing.isAvailableAsync();
+          if (canShare) {
+            await Sharing.shareAsync(uri, { mimeType: mime });
+          } else {
+            const supported = await Linking.canOpenURL(uri);
+            if (!supported) {
+              throw new Error('Cannot open this file on iOS');
+            }
+            await Linking.openURL(uri);
           }
-          await Linking.openURL(uri);
         }
       } catch (error: any) {
         console.error('Error opening file:', error);
@@ -245,12 +251,19 @@ export function useMeterReports() {
   // Open a generated report
   const openReport = async (reportId: string): Promise<void> => {
     try {
+      if (!organizationId) {
+        throw new Error('Organization ID is required for meter readings');
+      }
       // Download the report file
-      const blob = await downloadMeterReport(reportId);
+      const blob = await downloadMeterReport(reportId, organizationId);
       
       // Get the report metadata from cache if available
-      const cachedReports = queryClient.getQueryData<MeterReport[]>(['meterReports']);
-      const reportMetadata = cachedReports?.find(report => report.id === reportId);
+      const cachedReports = queryClient.getQueryData<MeterReport[]>(['meterReports', organizationId]);
+      let reportMetadata = cachedReports?.find(report => report.id === reportId);
+      if (!reportMetadata) {
+        const latestReports = await getMeterReports(organizationId);
+        reportMetadata = latestReports.find(report => report.id === reportId);
+      }
       
       if (!reportMetadata) {
         throw new Error('Report metadata not found');
@@ -286,12 +299,19 @@ export function useMeterReports() {
   // Share a generated report
   const shareReport = async (reportId: string): Promise<void> => {
     try {
+      if (!organizationId) {
+        throw new Error('Organization ID is required for meter readings');
+      }
       // Download the report file
-      const blob = await downloadMeterReport(reportId);
+      const blob = await downloadMeterReport(reportId, organizationId);
       
       // Get the report metadata from cache if available
-      const cachedReports = queryClient.getQueryData<MeterReport[]>(['meterReports']);
-      const reportMetadata = cachedReports?.find(report => report.id === reportId);
+      const cachedReports = queryClient.getQueryData<MeterReport[]>(['meterReports', organizationId]);
+      let reportMetadata = cachedReports?.find(report => report.id === reportId);
+      if (!reportMetadata) {
+        const latestReports = await getMeterReports(organizationId);
+        reportMetadata = latestReports.find(report => report.id === reportId);
+      }
       
       if (!reportMetadata) {
         throw new Error('Report metadata not found');
