@@ -5,7 +5,7 @@
   },
   "build": {
     "development": {
-      "node": "22.14.0",
+      "node": "24.11.1",
       "developmentClient": true,
       "distribution": "internal",
       "android": {
@@ -13,9 +13,9 @@
       },
       "env": {
         "EXPO_PUBLIC_PROJECT_ID": "82b3f1dd-e785-4428-b0ac-4070ea808e59",
-        "EXPO_PUBLIC_APP_VERSION": "1.1.0",
+        "EXPO_PUBLIC_APP_VERSION": "1.1.2",
         "EXPO_PUBLIC_PUSH_NOTIFICATION_ENDPOINT": "/api/notifications/token",
-        "EXPO_PUBLIC_API_URL": "https://avyi-server.azurewebsites.net/",
+        "EXPO_PUBLIC_API_URL": "https://avy-i-api.avyrentechnologies.com/",
         "EXPO_PUBLIC_SCADA_INTERVAL": "30000",
         "EXPO_ANDROID_TARGET_SDK_VERSION": "36",
         "NODE_ENV": "development"
@@ -24,14 +24,14 @@
     },
     "preview": {
       "distribution": "internal",
-      "node": "22.14.0",
+      "node": "24.11.1",
       "android": {
         "ndk": "29.0.14206865"
       },
       "env": {
         "EXPO_PUBLIC_PROJECT_ID": "82b3f1dd-e785-4428-b0ac-4070ea808e59",
-        "EXPO_PUBLIC_APP_VERSION": "1.1.0",
-        "EXPO_PUBLIC_API_URL": "https://avyi-server.azurewebsites.net/",
+        "EXPO_PUBLIC_APP_VERSION": "1.1.2",
+        "EXPO_PUBLIC_API_URL": "https://avy-i-api.avyrentechnologies.com/",
         "EXPO_PUBLIC_PUSH_NOTIFICATION_ENDPOINT": "/api/notifications/token",
         "EXPO_PUBLIC_SCADA_INTERVAL": "30000",
         "EXPO_ANDROID_TARGET_SDK_VERSION": "36",
@@ -44,11 +44,11 @@
       "android": {
         "ndk": "29.0.14206865"
       },
-      "node": "22.14.0",
+      "node": "24.11.1",
       "env": {
         "EXPO_PUBLIC_PROJECT_ID": "82b3f1dd-e785-4428-b0ac-4070ea808e59",
-        "EXPO_PUBLIC_APP_VERSION": "1.1.0",
-        "EXPO_PUBLIC_API_URL": "https://avyi-server.azurewebsites.net/",
+        "EXPO_PUBLIC_APP_VERSION": "1.1.2",
+        "EXPO_PUBLIC_API_URL": "https://avy-i-api.avyrentechnologies.com/",
         "EXPO_PUBLIC_PUSH_NOTIFICATION_ENDPOINT": "/api/notifications/token",
         "EXPO_PUBLIC_SCADA_INTERVAL": "30000",
         "NODE_ENV": "production"
