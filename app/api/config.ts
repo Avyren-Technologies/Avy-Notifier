@@ -9,9 +9,13 @@ console.log('Environment variables check:', {
   NODE_ENV: process.env.NODE_ENV,
 });
 
+const rawApiUrl =
+  process.env.EXPO_PUBLIC_API_URL ||
+  'https://Avy-I-server-eyckc9gmbvf7bqgq.centralindia-01.azurewebsites.net';
+
 export const apiConfig = {
-  // Base URL for API calls - use production URL as fallback instead of local IP
-  apiUrl: process.env.EXPO_PUBLIC_API_URL || 'https://Avy-I-server-eyckc9gmbvf7bqgq.centralindia-01.azurewebsites.net',
+  // Base URL for API calls - trim trailing slashes so `${apiUrl}/api/...` never becomes `//api/...`
+  apiUrl: rawApiUrl.replace(/\/+$/, ''),
   
   // Default request timeout in milliseconds
   timeout: 15000,
